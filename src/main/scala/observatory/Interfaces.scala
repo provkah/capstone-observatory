@@ -8,7 +8,7 @@ import java.time.LocalDate
 
 trait ManipulationInterface {
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature
-  def average(temperaturess: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature
+  def average(temperatures: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature
   def deviation(temperatures: Iterable[(Location, Temperature)], normals: GridLocation => Temperature): GridLocation => Temperature
 }
 
@@ -30,6 +30,8 @@ trait InteractionInterface {
 }
 
 trait ExtractionInterface {
-  def locateTemperatures(year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)]
-  def locationYearlyAverageRecords(records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]
+  def locateTemperatures(
+    year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)]
+  def locationYearlyAverageRecords(
+    records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]
 }

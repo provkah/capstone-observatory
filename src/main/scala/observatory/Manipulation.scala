@@ -15,11 +15,11 @@ object Manipulation extends ManipulationInterface {
   }
 
   /**
-    * @param temperaturess Sequence of known temperatures over the years (each element of the collection
+    * @param temperatures Sequence of known temperatures over the years (each element of the collection
     *                      is a collection of pairs of location and temperature)
     * @return A function that, given a latitude and a longitude, returns the average temperature at this location
     */
-  def average(temperaturess: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
+  def average(temperatures: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
     ???
   }
 

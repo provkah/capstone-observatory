@@ -4,26 +4,6 @@ import java.time.LocalDate
 
 object Extraction extends ExtractionInterface {
 
-  /*val StationsNumFields = 4
-
-  val TempsNumFields = 5
-
-  val MonthMin = 1
-  val MonthMax = 12
-  val DayMin = 1
-  val DayMax = 31
-
-  val LatitudeMax = 90
-  val LongitudeMax = 180
-
-  val NoTempStr = "9999.9"
-
-  type StnId = Int
-  type WbanId = Int
-
-  type Month = Int
-  type Day = Int*/
-
   /**
     * 1st milestone: data extraction
     */

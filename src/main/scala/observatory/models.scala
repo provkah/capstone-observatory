@@ -5,7 +5,10 @@ package observatory
   * @param lat Degrees of latitude, -90 ≤ lat ≤ 90
   * @param lon Degrees of longitude, -180 ≤ lon ≤ 180
   */
-case class Location(lat: Double, lon: Double)
+case class Location(lat: Double, lon: Double) {
+
+  def isValid: Boolean = !lat.isNaN & lon.isNaN
+}
 
 /**
   * Introduced in Week 3. Represents a tiled web map tile.

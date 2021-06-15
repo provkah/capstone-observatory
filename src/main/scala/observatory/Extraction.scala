@@ -24,7 +24,7 @@ object Extraction extends ExtractionInterface {
     val stationsLines: List[String] = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
     val stations: List[((Option[StnId], Option[WbanId]), Location)] = stationsLines
       .map(ExtractionUtils.lineToStationRec)
-      .filter({ case (_, loc) => !loc.lon.isNaN & !loc.lat.isNaN })
+      .filter({ case (_, loc) => loc.isValid })
 
     val stationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
     temps.map({

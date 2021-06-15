@@ -35,9 +35,3 @@ trait ExtractionInterface {
   def locationYearlyAverageRecords(
     records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]
 }
-
-trait UtilsInterface {
-  def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double
-
-  def getLinesIteratorFromResFile(resFile: String, classObj: Class[_]): Iterator[String]
-}

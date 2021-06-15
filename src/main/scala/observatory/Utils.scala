@@ -3,7 +3,7 @@ package observatory
 import java.io.InputStream
 import scala.io.{BufferedSource, Source}
 
-object Utils extends UtilsInterface {
+object Utils {
 
   def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double =
     (degreesFahrenheit - 32) / 1.8

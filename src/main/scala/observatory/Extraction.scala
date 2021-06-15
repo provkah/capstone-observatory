@@ -1,8 +1,6 @@
 package observatory
 
-import java.io.InputStream
 import java.time.LocalDate
-import scala.io.{BufferedSource, Source}
 
 object Extraction extends ExtractionInterface {
 
@@ -40,10 +38,10 @@ object Extraction extends ExtractionInterface {
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)] = {
 
-    val tempsLines: List[String] = getLinesIteratorFromResFile(temperaturesFile).toList
+    val tempsLines: List[String] = Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList
     val temps: List[((Option[StnId], Option[WbanId]), (Month, Day), Temperature)] = tempsLines.map(lineToTempRec)
 
-    val stationsLines: List[String] = getLinesIteratorFromResFile(stationsFile).toList
+    val stationsLines: List[String] = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
     val stations: List[((Option[StnId], Option[WbanId]), Location)] = stationsLines
       .map(lineToStationRec)
       .filter({ case (_, loc) => !loc.lon.isNaN & !loc.lat.isNaN })
@@ -87,7 +85,7 @@ object Extraction extends ExtractionInterface {
     if (day < DayMin || day > DayMax) sys.error(s"Day value must be between $DayMin and $DayMax, found: $day")
 
     val temp =
-      if (fields(4).nonEmpty && fields(4) != NoTempStr) tempFahrenheitToCelcius(fields(4).toDouble)
+      if (fields(4).nonEmpty && fields(4) != NoTempStr) Utils.tempFahrenheitToCelcius(fields(4).toDouble)
       else Double.NaN
 
     ((stnId, wbanId), (month, day), temp)
@@ -117,17 +115,5 @@ object Extraction extends ExtractionInterface {
       else Double.NaN
 
     ((stnId, wbanId), Location(lat, lon))
-  }
-
-  def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double =
-    (degreesFahrenheit - 32) / 1.8
-
-  def getLinesIteratorFromResFile(resFile: String): Iterator[String] = {
-
-    val resStream: InputStream = getClass.getResourceAsStream(resFile)
-    if (resStream == null) sys.error(s"Resource file not found: $resFile")
-
-    val bufSrc: BufferedSource = Source.fromInputStream(resStream)("UTF-8")
-    bufSrc.getLines()
   }
 }

@@ -2,10 +2,14 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
+import scala.math.pow
+
 /**
   * 2nd milestone: basic visualization
   */
 object Visualization extends VisualizationInterface {
+
+  val InverseDistanceWeighingPower = 2
 
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
@@ -13,7 +17,22 @@ object Visualization extends VisualizationInterface {
     * @return The predicted temperature at `location`
     */
   def predictTemperature(temperatures: Iterable[(Location, Temperature)], location: Location): Temperature = {
-    ???
+
+    if (temperatures.isEmpty) sys.error("temperatures collection is empty")
+
+    val tempOpt: Option[(Location, Temperature)] = temperatures.find({ case (loc, _) => loc == location })
+    if (tempOpt.nonEmpty) tempOpt.get match { case (_, tempr ) => tempr }
+    else {
+      val weights: Iterable[Double] = temperatures.map({
+        case (loc, _) => 1.0D / pow(Utils.greatCircleDistance(location, loc), InverseDistanceWeighingPower)
+      })
+
+      val sumOfWeights = weights.fold(0.0D)(_ + _)
+
+      temperatures
+        .zip(weights).map({ case ((_, t), w) => t * w })
+        .fold(0.0D)(_ + _) / sumOfWeights
+    }
   }
 
   /**

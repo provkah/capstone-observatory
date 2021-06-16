@@ -1,5 +1,7 @@
 package observatory
 
+import scala.math.abs
+
 /**
   * Introduced in Week 1. Represents a location on the globe.
   * @param lat Degrees of latitude, -90 ≤ lat ≤ 90
@@ -8,6 +10,9 @@ package observatory
 case class Location(lat: Double, lon: Double) {
 
   def isValid: Boolean = !lat.isNaN && !lon.isNaN
+
+  def isAntipode(other: Location): Boolean =
+      ((lat + other.lat) == 0) && (abs(lon - other.lon) == 180)
 }
 
 /**

@@ -7,7 +7,10 @@ package observatory
   */
 case class Location(lat: Double, lon: Double) {
 
-  def isValid: Boolean = !lat.isNaN & lon.isNaN
+  def isValid: Boolean = !lat.isNaN && !lon.isNaN
+
+  def isAntipode(other: Location): Boolean =
+      ((lat + other.lat) == 0) && (abs(lon - other.lon) == 180)
 }
 
 /**

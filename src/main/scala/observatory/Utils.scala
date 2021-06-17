@@ -15,7 +15,7 @@ object Utils {
       val lat1 = angleDegreesToRadians(loc1.lat)
       val lat2 = angleDegreesToRadians(loc2.lat)
       val deltaLon = angleDegreesToRadians(abs(loc1.lon - loc2.lon))
-      acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat1) * cos(deltaLon))
+      acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(deltaLon))
     }
   }
 

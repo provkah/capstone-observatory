@@ -6,6 +6,7 @@ import org.scalacheck.Test
 class CapstoneSuite
   extends ExtractionTest
     with VisualizationTest
+    with Utils2Test
     with InteractionTest
     with ManipulationTest
     with Visualization2Test
@@ -19,6 +20,5 @@ trait MilestoneSuite {
     } else {
       fail(s"Milestone $level ($milestoneName) is disabled. To enable it, set the 'Grading.milestone' value to '$level'.")
     }
-
 }
 

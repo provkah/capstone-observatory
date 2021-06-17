@@ -11,6 +11,10 @@ object Visualization extends VisualizationInterface {
 
   val InverseDistanceWeighingPower = 2
 
+  val earthRadiusKm = 6378.0
+
+  val distanceThresholdKm = 1.0
+
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
     * @param location Location where to predict the temperature
@@ -20,18 +24,30 @@ object Visualization extends VisualizationInterface {
 
     if (temperatures.isEmpty) sys.error("temperatures collection is empty")
 
-    val tempOpt: Option[(Location, Temperature)] = temperatures.find({ case (loc, _) => loc == location })
-    if (tempOpt.nonEmpty) tempOpt.get match { case (_, tempr ) => tempr }
+    val tempExactLocOpt: Option[(Location, Temperature)] = temperatures
+      .find({ case (loc, _) => loc == location })
+    if (tempExactLocOpt.nonEmpty) tempExactLocOpt.get match { case (_, tempr ) => tempr }
     else {
-      val weights: Iterable[Double] = temperatures.map({
-        case (loc, _) => 1.0D / pow(Utils.greatCircleDistance(location, loc), InverseDistanceWeighingPower)
-      })
+      val distTemprs: Iterable[(Double, Temperature)] = temperatures
+        .map({ case (loc, tempr) =>
+          val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
+          val dist = earthRadiusKm * centralAngle
+          (dist, tempr)
+        })
 
-      val sumOfWeights = weights.fold(0.0D)(_ + _)
+      val distTemprThresholdOpt: Option[(Double, Temperature)] = distTemprs
+        .find({ case (dist, _) => dist <= distanceThresholdKm } )
+      if (distTemprThresholdOpt.nonEmpty) distTemprThresholdOpt.get match { case (_, tempr ) => tempr }
+      else {
+        val weights: Iterable[Double] = distTemprs
+          .map({ case (dist, _) => 1.0D / pow(dist, InverseDistanceWeighingPower) })
 
-      temperatures
-        .zip(weights).map({ case ((_, t), w) => t * w })
-        .fold(0.0D)(_ + _) / sumOfWeights
+        val sumOfWeights = weights.fold(0.0D)(_ + _)
+
+        temperatures
+          .zip(weights).map({ case ((_, tempr), weight) => weight * tempr })
+          .fold(0.0D)(_ + _) / sumOfWeights
+      }
     }
   }
 

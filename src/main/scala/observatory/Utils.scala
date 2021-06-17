@@ -7,7 +7,7 @@ import scala.math.{abs, sin, cos, acos, Pi}
 
 object Utils {
 
-  def greatCircleDistance(loc1: Location, loc2: Location): Double = {
+  def greatCircleDistanceCentralAngle(loc1: Location, loc2: Location): Double = {
 
     if (loc1 == loc2) 0.0
     else if (loc1.isAntipode(loc2)) Pi

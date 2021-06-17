@@ -24,29 +24,32 @@ object Visualization extends VisualizationInterface {
 
     if (temperatures.isEmpty) sys.error("temperatures collection is empty")
 
-    val tempExactLocOpt: Option[(Location, Temperature)] = temperatures
-      .find({ case (loc, _) => loc == location })
-    if (tempExactLocOpt.nonEmpty) tempExactLocOpt.get match { case (_, tempr ) => tempr }
+    if (temperatures.size == 1) temperatures.head match { case (_, tempr) => tempr }
     else {
-      val distTemprs: Iterable[(Double, Temperature)] = temperatures
-        .map({ case (loc, tempr) =>
-          val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
-          val dist = earthRadiusKm * centralAngle
-          (dist, tempr)
-        })
-
-      val distTemprThresholdOpt: Option[(Double, Temperature)] = distTemprs
-        .find({ case (dist, _) => dist <= distanceThresholdKm } )
-      if (distTemprThresholdOpt.nonEmpty) distTemprThresholdOpt.get match { case (_, tempr ) => tempr }
+      val tempExactLocOpt: Option[(Location, Temperature)] = temperatures
+        .find({ case (loc, _) => loc == location })
+      if (tempExactLocOpt.nonEmpty) tempExactLocOpt.get match { case (_, tempr ) => tempr }
       else {
-        val weights: Iterable[Double] = distTemprs
-          .map({ case (dist, _) => 1.0D / pow(dist, InverseDistanceWeighingPower) })
+        val distTemprs: Iterable[(Double, Temperature)] = temperatures
+          .map({ case (loc, tempr) =>
+            val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
+            val dist = earthRadiusKm * centralAngle
+            (dist, tempr)
+          })
 
-        val sumOfWeights = weights.fold(0.0D)(_ + _)
+        val distTemprThresholdOpt: Option[(Double, Temperature)] = distTemprs
+          .find({ case (dist, _) => dist <= distanceThresholdKm } )
+        if (distTemprThresholdOpt.nonEmpty) distTemprThresholdOpt.get match { case (_, tempr ) => tempr }
+        else {
+          val weights: Iterable[Double] = distTemprs
+            .map({ case (dist, _) => 1.0D / pow(dist, InverseDistanceWeighingPower) })
 
-        temperatures
-          .zip(weights).map({ case ((_, tempr), weight) => weight * tempr })
-          .fold(0.0D)(_ + _) / sumOfWeights
+          val sumOfWeights = weights.fold(0.0D)(_ + _)
+
+          temperatures
+            .zip(weights).map({ case ((_, tempr), weight) => weight * tempr })
+            .fold(0.0D)(_ + _) / sumOfWeights
+        }
       }
     }
   }

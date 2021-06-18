@@ -87,7 +87,10 @@ object Visualization extends VisualizationInterface {
         val green = Utils.linearInterpolation((t1, c1.green.toDouble), (t2, c2.green.toDouble), value)
         val blue = Utils.linearInterpolation((t1, c1.blue.toDouble), (t2, c2.blue.toDouble), value)
 
-        Color(Utils.clipRgbColor(round(red).toInt), round(green).toInt, round(blue).toInt)
+        Color(
+          Utils.clipRgbColor(round(red).toInt),
+          Utils.clipRgbColor(round(green).toInt),
+          Utils.clipRgbColor(round(blue).toInt))
       }
     }
   }

@@ -2,7 +2,7 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
-import scala.math.pow
+import scala.math.{pow, round}
 
 /**
   * 2nd milestone: basic visualization
@@ -60,7 +60,36 @@ object Visualization extends VisualizationInterface {
     * @return The color that corresponds to `value`, according to the color scale defined by `points`
     */
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color = {
-    ???
+
+    if (points.isEmpty) sys.error("points collection must not be empty")
+
+    if (points.size == 1) {
+      val (tempr, color) = points.head
+      if (tempr == value) color
+      else sys.error("points collection must have at least 2 items for interpolation")
+    } else {
+
+      val temprColorMap: Map[Temperature, Color] = points.toMap
+
+      val colorOpt: Option[Color] = temprColorMap.get(value)
+      if (colorOpt.nonEmpty) colorOpt.get
+      else {
+        val temprSorted: Array[Temperature] = temprColorMap.keys.toArray.sorted
+
+        val (idx1, idx2) = Utils.findPointsForLinearInterpolation(temprSorted, value)
+
+        val t1 = temprSorted(idx1)
+        val t2 = temprSorted(idx2)
+        val c1 = temprColorMap(t1)
+        val c2 = temprColorMap(t2)
+
+        val red = Utils.linearInterpolation((t1, c1.red.toDouble), (t2, c2.red.toDouble), value)
+        val green = Utils.linearInterpolation((t1, c1.green.toDouble), (t2, c2.green.toDouble), value)
+        val blue = Utils.linearInterpolation((t1, c1.blue.toDouble), (t2, c2.blue.toDouble), value)
+
+        Color(Utils.clipRgbColor(round(red).toInt), round(green).toInt, round(blue).toInt)
+      }
+    }
   }
 
   /**

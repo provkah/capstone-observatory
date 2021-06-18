@@ -1,11 +1,51 @@
 package observatory
 
 import java.io.InputStream
-
+import scala.annotation.tailrec
 import scala.io.{BufferedSource, Source}
-import scala.math.{abs, sin, cos, acos, Pi}
+import scala.math.{Pi, abs, acos, cos, sin}
 
 object Utils {
+
+  val RgbColorMin = 0
+  val RgbColorMax = 255
+
+  type Point = (Double, Double)
+
+  def linearInterpolation(p1: Point, p2: Point, x: Double): Double =
+    (p1, p2) match {
+      case ((x1, y1), (x2, y2)) => y1 + (y2 - y1)/(x2 - x1) * (x - x1)
+    }
+
+  // points must be sorted
+  def findPointsForLinearInterpolation(points: Array[Double], value: Double): (Int, Int) = {
+
+    // length (endIdx - startIdx + 1) is >= 2
+    @tailrec
+    def findPoints(startIdx: Int, endIdx: Int): (Int, Int) = {
+
+      val length = endIdx - startIdx + 1
+      if (length == 2) (startIdx, endIdx)
+      else {
+        val rightStartIdx = (startIdx + endIdx + 1) / 2
+        if (length == 3)
+          if (value <= points(rightStartIdx)) (startIdx, rightStartIdx)
+          else (rightStartIdx, endIdx)
+        else {
+          val leftEndIdx = rightStartIdx - 1
+          if (value <= points(leftEndIdx)) findPoints(startIdx, leftEndIdx)
+          else if (value < points(rightStartIdx)) (leftEndIdx, rightStartIdx)
+          else findPoints(rightStartIdx, endIdx)
+        }
+      }
+    }
+
+    if (points.length < 2) sys.error("points collection must have at least 2 items for interpolation")
+
+    if (value <= points.head) (0, 1)
+    else if (value >= points.last) (points.length - 2, points.length - 1)
+    else findPoints(0, points.length - 1)
+  }
 
   def greatCircleDistanceCentralAngle(loc1: Location, loc2: Location): Double = {
 
@@ -18,6 +58,8 @@ object Utils {
       acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(deltaLon))
     }
   }
+
+  def clipRgbColor(color: Int): Int = color.min(RgbColorMax).max(RgbColorMin)
 
   def angleDegreesToRadians(angleInDegrees: Double): Double = angleInDegrees / 180.0 * Pi
 

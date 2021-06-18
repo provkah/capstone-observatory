@@ -15,6 +15,11 @@ object Visualization extends VisualizationInterface {
 
   val DistanceThresholdKm = 1.0
 
+  val ImageWidth = 360
+  val ImageHeight = 180
+
+  val RgbaAlpha = 0
+
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
     * @param location Location where to predict the temperature
@@ -101,7 +106,20 @@ object Visualization extends VisualizationInterface {
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
   def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image = {
-    ???
+    val pixelLocations: Seq[Location] = for {
+      y <- 0 until ImageHeight
+      x <- 0 until ImageWidth
+      lat = Utils.LatitudeMax - y
+      lon = x - Utils.LongitudeMax
+    } yield Location(lat, lon)
+
+    val pixelTemperatures: Seq[Temperature] = pixelLocations.map(predictTemperature(temperatures, _))
+
+    val pixelColors: Seq[Color] = pixelTemperatures.map(interpolateColor(colors, _))
+
+    val pixels: Seq[Pixel] = pixelColors.map(c => Pixel(c.red, c.green, c.blue, RgbaAlpha))
+
+    Image(ImageWidth, ImageHeight, pixels.toArray)
   }
 }
 

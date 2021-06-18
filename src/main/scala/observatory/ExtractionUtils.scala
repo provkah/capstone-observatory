@@ -11,9 +11,6 @@ object ExtractionUtils {
   val DayMin = 1
   val DayMax = 31
 
-  val LatitudeMax = 90
-  val LongitudeMax = 180
-
   val NoTempStr = "9999.9"
 
   def lineToTempRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature) = {
@@ -40,13 +37,13 @@ object ExtractionUtils {
 
     def getLatitude(field: String): Double = {
       val v = field.toDouble
-      if (v < -LatitudeMax || v > LatitudeMax) sys.error(s"Latitude value must be between -$LatitudeMax and $LatitudeMax. Found: $v")
+      if (v < - Utils.LatitudeMax || v > Utils.LatitudeMax) sys.error(s"Latitude value must be between -$Utils.LatitudeMax and $Utils.LatitudeMax. Found: $v")
       v
     }
 
     def getLongitude(field: String): Double = {
       val v = field.toDouble
-      if (v < -LongitudeMax || v > LongitudeMax) sys.error(s"Longitude value must be between -$LongitudeMax and $LongitudeMax. Found: $v")
+      if (v < - Utils.LongitudeMax || v > Utils.LongitudeMax) sys.error(s"Longitude value must be between -$Utils.LongitudeMax and $Utils.LongitudeMax. Found: $v")
       v
     }
 

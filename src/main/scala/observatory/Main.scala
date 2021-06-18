@@ -30,7 +30,7 @@ object Main extends App {
   Console.println(s"current dir: ${dir.getAbsolutePath}")
   for (file <- dir.listFiles) Console.println(file.getPath)*/
 
-  for (year <- 1975 to 2015) {
+  for (year <- 2015 to 2015) {
     Console.println(s"Year: $year")
 
     val temprRecs: Iterable[(LocalDate, Location, Temperature)] = Extraction.locateTemperatures(

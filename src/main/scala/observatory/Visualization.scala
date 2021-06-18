@@ -11,9 +11,9 @@ object Visualization extends VisualizationInterface {
 
   val InverseDistanceWeighingPower = 2
 
-  val earthRadiusKm = 6378.0
+  val EarthRadiusKm = 6378.0
 
-  val distanceThresholdKm = 1.0
+  val DistanceThresholdKm = 1.0
 
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
@@ -33,12 +33,12 @@ object Visualization extends VisualizationInterface {
         val distTemprs: Iterable[(Double, Temperature)] = temperatures
           .map({ case (loc, tempr) =>
             val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
-            val dist = earthRadiusKm * centralAngle
+            val dist = EarthRadiusKm * centralAngle
             (dist, tempr)
           })
 
         val distTemprThresholdOpt: Option[(Double, Temperature)] = distTemprs
-          .find({ case (dist, _) => dist <= distanceThresholdKm } )
+          .find({ case (dist, _) => dist <= DistanceThresholdKm } )
         if (distTemprThresholdOpt.nonEmpty) distTemprThresholdOpt.get match { case (_, tempr ) => tempr }
         else {
           val weights: Iterable[Double] = distTemprs

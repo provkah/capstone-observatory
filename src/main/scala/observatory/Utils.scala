@@ -9,7 +9,7 @@ object Utils extends UtilsInterface {
 
   def linearInterpolation(p1: Point, p2: Point, x: Double): Double =
     (p1, p2) match {
-      case ((x1, y1), (x2, y2)) => y1 + (y2 - y1)/(x2 - x1) * (x - x1)
+      case ((x1, y1), (x2, y2)) => y1 + (y2 - y1) / (x2 - x1) * (x - x1)
     }
 
   // points must be sorted

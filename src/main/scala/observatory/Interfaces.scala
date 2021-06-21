@@ -1,6 +1,7 @@
 package observatory
 
 import com.sksamuel.scrimage.Image
+
 import java.time.LocalDate
 
 // Interfaces used by the grading infrastructure. Do not change signatures

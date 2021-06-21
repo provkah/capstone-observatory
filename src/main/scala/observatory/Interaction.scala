@@ -9,6 +9,11 @@ import scala.math.{Pi, atan, pow, sinh}
   */
 object Interaction extends InteractionInterface {
 
+  val TileWidth = 256
+  val TileHeight = 256
+
+  val TileRgbaAlpha = 0.5
+
   /**
     * @param tile Tile coordinates
     * @return The latitude and longitude of the top-left corner of the tile, as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -30,9 +35,25 @@ object Interaction extends InteractionInterface {
     * @return A 256×256 image showing the contents of the given tile
     */
   def tile(
-    temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)], tile: Tile): Image = {
+    temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)],
+    tile: Tile): Image = {
 
-    ???
+    val tileRelativeZoom = 8 // number of tiles in both axis: 2 ** 8 == 256
+    val coordFactor = pow(2, tileRelativeZoom).toInt
+
+    val tileZoom = tile.zoom + tileRelativeZoom
+
+    val xStart = tile.x * coordFactor
+    val yStart = tile.y * coordFactor
+    val pixelLocations: Seq[Location] = for {
+      y <- yStart until yStart + TileHeight
+      x <- xStart until xStart + TileWidth
+    } yield tileLocation(Tile(x, y, tileZoom))
+
+    val alpha = (TileRgbaAlpha * 256 - 1).toInt
+    val pixels: Iterable[Pixel] = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
+
+    Image(TileWidth, TileHeight, pixels.toArray)
   }
 
   /**

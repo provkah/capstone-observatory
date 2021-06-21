@@ -18,7 +18,7 @@ object Visualization extends VisualizationInterface {
   val ImageWidth = 360
   val ImageHeight = 180
 
-  val RgbaAlpha = 0
+  val RgbaAlpha = 0.5
 
   /**
     * @param temperatures Known temperatures: pairs containing a location and the temperature at this location
@@ -114,13 +114,23 @@ object Visualization extends VisualizationInterface {
       lon = x - Utils.LongitudeMax
     } yield Location(lat, lon)
 
-    val pixelTemperatures: Seq[Temperature] = pixelLocations.map(predictTemperature(temperatures, _))
-
-    val pixelColors: Seq[Color] = pixelTemperatures.map(interpolateColor(colors, _))
-
-    val pixels: Seq[Pixel] = pixelColors.map(c => Pixel(c.red, c.green, c.blue, RgbaAlpha))
+    val alpha = (RgbaAlpha * 256 - 1).toInt
+    val pixels: Iterable[Pixel] = locationsToPixels(pixelLocations, alpha, temperatures, colors)
 
     Image(ImageWidth, ImageHeight, pixels.toArray)
+  }
+
+  def locationsToPixels(
+           pixelLocations: Iterable[Location],
+           alpha: Int,
+           temperatures: Iterable[(Location, Temperature)],
+           colors: Iterable[(Temperature, Color)]): Iterable[Pixel] = {
+
+    val pixelTemperatures: Iterable[Temperature] = pixelLocations.map(predictTemperature(temperatures, _))
+
+    val pixelColors: Iterable[Color] = pixelTemperatures.map(interpolateColor(colors, _))
+
+    pixelColors.map(c => Pixel(c.red, c.green, c.blue, alpha))
   }
 }
 

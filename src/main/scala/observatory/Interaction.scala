@@ -2,6 +2,8 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
+import scala.math.{Pi, atan, pow, sinh}
+
 /**
   * 3rd milestone: interactive visualization
   */
@@ -12,7 +14,13 @@ object Interaction extends InteractionInterface {
     * @return The latitude and longitude of the top-left corner of the tile, as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
     */
   def tileLocation(tile: Tile): Location = {
-    ???
+
+    val twoToPowerOfZoom: Double = pow(2.0, tile.zoom)
+
+    val lon: Double = tile.x / twoToPowerOfZoom * 360.0  - 180.0
+    val lat = atan(sinh(Pi * (1.0 - 2.0 * tile.y / twoToPowerOfZoom))) * 180.0 / Pi
+
+    Location(lat, lon)
   }
 
   /**
@@ -21,7 +29,9 @@ object Interaction extends InteractionInterface {
     * @param tile Tile coordinates
     * @return A 256×256 image showing the contents of the given tile
     */
-  def tile(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)], tile: Tile): Image = {
+  def tile(
+    temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)], tile: Tile): Image = {
+
     ???
   }
 
@@ -34,8 +44,8 @@ object Interaction extends InteractionInterface {
     */
   def generateTiles[Data](
     yearlyData: Iterable[(Year, Data)],
-    generateImage: (Year, Tile, Data) => Unit
-  ): Unit = {
+    generateImage: (Year, Tile, Data) => Unit): Unit = {
+
     ???
   }
 }

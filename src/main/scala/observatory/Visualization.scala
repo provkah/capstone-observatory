@@ -106,6 +106,7 @@ object Visualization extends VisualizationInterface {
     * @return A 360×180 image where each pixel shows the predicted temperature at its location
     */
   def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image = {
+
     val pixelLocations: Seq[Location] = for {
       y <- 0 until ImageHeight
       x <- 0 until ImageWidth

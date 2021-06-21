@@ -46,3 +46,45 @@ trait ExtractionInterface {
   def locationYearlyAverageRecords(
     records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]
 }
+
+trait ExtractionUtilsInterface {
+
+  val StationsNumFields = 4
+
+  val TempsNumFields = 5
+
+  val MonthMin = 1
+  val MonthMax = 12
+  val DayMin = 1
+  val DayMax = 31
+
+  val NoTempStr = "9999.9"
+
+  def lineToTempRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature)
+
+  def lineToStationRec(line: String): ((Option[StnId], Option[WbanId]), Location)
+}
+
+trait UtilsInterface {
+
+  val RgbColorMin = 0
+  val RgbColorMax = 255
+  val LatitudeMax = 90
+  val LongitudeMax = 180
+  type Point = (Double, Double)
+
+  def linearInterpolation(p1: Point, p2: Point, x: Double): Double
+
+  // points must be sorted
+  def findPointsForLinearInterpolation(points: Array[Double], value: Double): (Int, Int)
+
+  def greatCircleDistanceCentralAngle(loc1: Location, loc2: Location): Double
+
+  def clipRgbColor(color: Int): Int
+
+  def angleDegreesToRadians(angleInDegrees: Double): Double
+
+  def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double
+
+  def getLinesIteratorFromResFile(resFile: String, classObj: Class[_]): Iterator[String]
+}

@@ -1,17 +1,6 @@
 package observatory
 
-object ExtractionUtils {
-
-  val StationsNumFields = 4
-
-  val TempsNumFields = 5
-
-  val MonthMin = 1
-  val MonthMax = 12
-  val DayMin = 1
-  val DayMax = 31
-
-  val NoTempStr = "9999.9"
+object ExtractionUtils extends ExtractionUtilsInterface {
 
   def lineToTempRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature) = {
 

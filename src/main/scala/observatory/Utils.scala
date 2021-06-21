@@ -5,15 +5,7 @@ import scala.annotation.tailrec
 import scala.io.{BufferedSource, Source}
 import scala.math.{Pi, abs, acos, cos, sin}
 
-object Utils {
-
-  val RgbColorMin = 0
-  val RgbColorMax = 255
-
-  val LatitudeMax = 90
-  val LongitudeMax = 180
-
-  type Point = (Double, Double)
+object Utils extends UtilsInterface {
 
   def linearInterpolation(p1: Point, p2: Point, x: Double): Double =
     (p1, p2) match {

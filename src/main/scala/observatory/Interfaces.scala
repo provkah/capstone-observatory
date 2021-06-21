@@ -17,21 +17,32 @@ trait Visualization2Interface {
   def visualizeGrid(grid: GridLocation => Temperature, colors: Iterable[(Temperature, Color)], tile: Tile): Image
 }
 
-trait VisualizationInterface {
-  def predictTemperature(temperatures: Iterable[(Location, Temperature)], location: Location): Temperature
-  def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color
-  def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image
-}
-
 trait InteractionInterface {
+
   def tileLocation(tile: Tile): Location
-  def tile(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)], tile: Tile): Image
+
+  def tile(
+    temperatures: Iterable[(Location, Temperature)],
+    colors: Iterable[(Temperature, Color)],
+    tile: Tile): Image
+
   def generateTiles[Data](yearlyData: Iterable[(Year, Data)], generateImage: (Year, Tile, Data) => Unit): Unit
 }
 
+trait VisualizationInterface {
+
+  def predictTemperature(temperatures: Iterable[(Location, Temperature)], location: Location): Temperature
+
+  def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color
+
+  def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image
+}
+
 trait ExtractionInterface {
+
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)]
+
   def locationYearlyAverageRecords(
     records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]
 }

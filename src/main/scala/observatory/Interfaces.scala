@@ -47,7 +47,7 @@ trait VisualizationInterface {
 
 trait ExtractionInterface {
 
-  def locateStations(stationsFile: String): Seq[((Option[StnId], Option[WbanId]), Location)]
+  def locateStations(stationsFile: String): Iterable[((Option[StnId], Option[WbanId]), Location)]
 
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)]

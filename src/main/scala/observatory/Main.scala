@@ -26,7 +26,7 @@ object Main extends App {
   /*val conf: SparkConf = new SparkConf().setMaster("local").setAppName("Observatory")
   val sc: SparkContext = new SparkContext(conf)*/
 
-  val stations: Seq[((Option[StnId], Option[WbanId]), Location)] =
+  val stations: Iterable[((Option[StnId], Option[WbanId]), Location)] =
     Extraction.locateStations(s"/$StationsFile")
   val stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
   Console.println(s"stations size: ${stationLocationMap.size}")

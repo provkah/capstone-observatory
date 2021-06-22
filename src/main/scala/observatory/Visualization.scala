@@ -2,6 +2,7 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
+import scala.collection.parallel.ParIterable
 import scala.math.{pow, round}
 
 /**
@@ -29,11 +30,13 @@ object Visualization extends VisualizationInterface {
 
     if (temperatures.size == 1) temperatures.head match { case (_, tempr) => tempr }
     else {
-      val tempExactLocOpt: Option[(Location, Temperature)] = temperatures
+      val locTemperatures: ParIterable[(Location, Temperature)] = temperatures.par
+
+      val tempExactLocOpt: Option[(Location, Temperature)] = locTemperatures
         .find({ case (loc, _) => loc == location })
       if (tempExactLocOpt.nonEmpty) tempExactLocOpt.get match { case (_, tempr ) => tempr }
       else {
-        val distTemprs: Iterable[(Double, Temperature)] = temperatures
+        val distTemprs: ParIterable[(Double, Temperature)] = locTemperatures
           .map({ case (loc, tempr) =>
             val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
             val dist = EarthRadiusKm * centralAngle
@@ -44,13 +47,13 @@ object Visualization extends VisualizationInterface {
           .find({ case (dist, _) => dist <= DistanceThresholdKm } )
         if (distTemprThresholdOpt.nonEmpty) distTemprThresholdOpt.get match { case (_, tempr ) => tempr }
         else {
-          val weights: Iterable[Double] = distTemprs
+          val distWeights: ParIterable[Double] = distTemprs
             .map({ case (dist, _) => 1.0D / pow(dist, InverseDistanceWeighingPower) })
 
-          val sumOfWeights = weights.fold(0.0D)(_ + _)
+          val sumOfWeights = distWeights.fold(0.0D)(_ + _)
 
-          temperatures
-            .zip(weights).map({ case ((_, tempr), weight) => weight * tempr })
+          locTemperatures
+            .zip(distWeights).map({ case ((_, tempr), weight) => weight * tempr })
             .fold(0.0D)(_ + _) / sumOfWeights
         }
       }
@@ -113,7 +116,7 @@ object Visualization extends VisualizationInterface {
     } yield Location(lat, lon)
 
     val alpha = (RgbaAlpha * 256 - 1).toInt
-    val pixels: Iterable[Pixel] = locationsToPixels(pixelLocations, alpha, temperatures, colors)
+    val pixels: ParIterable[Pixel] = locationsToPixels(pixelLocations, alpha, temperatures, colors)
 
     Image(ImageWidth, ImageHeight, pixels.toArray)
   }
@@ -122,11 +125,12 @@ object Visualization extends VisualizationInterface {
            pixelLocations: Iterable[Location],
            alpha: Int,
            temperatures: Iterable[(Location, Temperature)],
-           colors: Iterable[(Temperature, Color)]): Iterable[Pixel] = {
+           colors: Iterable[(Temperature, Color)]): ParIterable[Pixel] = {
 
-    val pixelTemperatures: Iterable[Temperature] = pixelLocations.map(predictTemperature(temperatures, _))
+    val pixelTemperatures: ParIterable[Temperature] = pixelLocations.par
+      .map(predictTemperature(temperatures, _))
 
-    val pixelColors: Iterable[Color] = pixelTemperatures.map(interpolateColor(colors, _))
+    val pixelColors: ParIterable[Color] = pixelTemperatures.map(interpolateColor(colors, _))
 
     pixelColors.map(c => Pixel(c.red, c.green, c.blue, alpha))
   }

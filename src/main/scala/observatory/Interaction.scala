@@ -2,6 +2,7 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
+import scala.collection.parallel.ParIterable
 import scala.math.{Pi, atan, pow, sinh}
 
 /**
@@ -53,7 +54,7 @@ object Interaction extends InteractionInterface {
     } yield tileLocation(Tile(x, y, tileZoom))
 
     val alpha = (TileRgbaAlpha * 256 - 1).toInt
-    val pixels: Iterable[Pixel] = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
+    val pixels: ParIterable[Pixel] = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
 
     Image(TileWidth, TileHeight, pixels.toArray)
   }

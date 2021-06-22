@@ -1,8 +1,9 @@
 package observatory
 
-import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.{Image, Pixel}
 
 import java.time.LocalDate
+import scala.collection.parallel.ParIterable
 
 // Interfaces used by the grading infrastructure. Do not change signatures
 // or your submission will fail with a NoSuchMethodError.
@@ -45,6 +46,12 @@ trait VisualizationInterface {
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color
 
   def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image
+
+  def locationsToPixels(
+    pixelLocations: Iterable[Location],
+    alpha: Int,
+    temperatures: Iterable[(Location, Temperature)],
+    colors: Iterable[(Temperature, Color)]): ParIterable[Pixel]
 }
 
 trait ExtractionInterface {

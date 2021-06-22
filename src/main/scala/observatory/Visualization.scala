@@ -11,8 +11,6 @@ object Visualization extends VisualizationInterface {
 
   val InverseDistanceWeighingPower = 2
 
-  val EarthRadiusKm = 6378.0
-
   val DistanceThresholdKm = 1.0
 
   val ImageWidth = 360

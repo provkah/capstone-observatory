@@ -38,6 +38,8 @@ trait InteractionInterface {
 
 trait VisualizationInterface {
 
+  val EarthRadiusKm = 6378.0
+
   def predictTemperature(temperatures: Iterable[(Location, Temperature)], location: Location): Temperature
 
   def interpolateColor(points: Iterable[(Temperature, Color)], value: Temperature): Color

@@ -35,6 +35,10 @@ trait InteractionInterface {
   def generateTiles[Data](
     year: Int, data: Data,
     generateImage: (Year, Tile, Data) => Unit): Unit
+
+  def generateTiles[Data](
+    year: Int, data: Data, zoom: Int,
+    generateImage: (Year, Tile, Data) => Unit): Unit
 }
 
 trait VisualizationInterface {
@@ -48,7 +52,7 @@ trait VisualizationInterface {
   def visualize(temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)]): Image
 
   def locationsToPixels(
-    pixelLocations: Iterable[Location],
+    pixelLocations: ParIterable[Location],
     alpha: Int,
     temperatures: Iterable[(Location, Temperature)],
     colors: Iterable[(Temperature, Color)]): ParIterable[Pixel]

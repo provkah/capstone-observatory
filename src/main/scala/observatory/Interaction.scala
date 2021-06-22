@@ -2,7 +2,7 @@ package observatory
 
 import com.sksamuel.scrimage.{Image, Pixel}
 
-import scala.collection.parallel.ParIterable
+import scala.collection.parallel.{ParIterable, ParSeq}
 import scala.math.{Pi, atan, pow, sinh}
 
 /**
@@ -48,10 +48,13 @@ object Interaction extends InteractionInterface {
 
     val xStart = tile.x * coordFactor
     val yStart = tile.y * coordFactor
-    val pixelLocations: Seq[Location] = for {
+    val tileCoords: Seq[(Int, Int)] = for {
       y <- yStart until yStart + TileHeight
       x <- xStart until xStart + TileWidth
-    } yield tileLocation(Tile(x, y, tileZoom))
+    } yield (x, y)
+
+    val pixelLocations: ParSeq[Location] = tileCoords.par
+      .map({ case (x, y) => tileLocation(Tile(x, y, tileZoom)) })
 
     val alpha = (TileRgbaAlpha * 256 - 1).toInt
     val pixels: ParIterable[Pixel] = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
@@ -70,18 +73,27 @@ object Interaction extends InteractionInterface {
     yearlyData: Iterable[(Year, Data)],
     generateImage: (Year, Tile, Data) => Unit): Unit = {
 
-    for {
-      (year, yearData) <- yearlyData
-    } generateTiles(year, yearData, generateImage)
+    yearlyData.par
+      .foreach({ case (year, yearData) => generateTiles(year, yearData, generateImage) })
   }
 
-  def generateTiles[Data](year: Int, data: Data, generateImage: (Year, Tile, Data) => Unit): Unit = {
+  def generateTiles[Data](
+    year: Int, data: Data,
+    generateImage: (Year, Tile, Data) => Unit): Unit = {
 
-    for {
-      zoom <- ZoomLevels
-      numTiles = pow(2, zoom).toInt
+    ZoomLevels.par.foreach(generateTiles(year, data, _, generateImage))
+  }
+
+  def generateTiles[Data](
+    year: Int, data: Data, zoom: Int,
+    generateImage: (Year, Tile, Data) => Unit): Unit = {
+
+    val numTiles = pow(2, zoom).toInt
+    val tiles: Seq[Tile] = for {
       xTile <- 0 until numTiles
       yTile <- 0 until numTiles
-    } generateImage(year, Tile(xTile, yTile, zoom), data)
+    } yield Tile(xTile, yTile, zoom)
+
+    tiles.par.foreach(generateImage(year, _, data))
   }
 }

@@ -116,18 +116,18 @@ object Visualization extends VisualizationInterface {
     } yield Location(lat, lon)
 
     val alpha = (RgbaAlpha * 256 - 1).toInt
-    val pixels: ParIterable[Pixel] = locationsToPixels(pixelLocations, alpha, temperatures, colors)
+    val pixels: ParIterable[Pixel] = locationsToPixels(pixelLocations.par, alpha, temperatures, colors)
 
     Image(ImageWidth, ImageHeight, pixels.toArray)
   }
 
   def locationsToPixels(
-           pixelLocations: Iterable[Location],
+           pixelLocations: ParIterable[Location],
            alpha: Int,
            temperatures: Iterable[(Location, Temperature)],
            colors: Iterable[(Temperature, Color)]): ParIterable[Pixel] = {
 
-    val pixelTemperatures: ParIterable[Temperature] = pixelLocations.par
+    val pixelTemperatures: ParIterable[Temperature] = pixelLocations
       .map(predictTemperature(temperatures, _))
 
     val pixelColors: ParIterable[Color] = pixelTemperatures.map(interpolateColor(colors, _))

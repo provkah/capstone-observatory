@@ -27,7 +27,13 @@ trait InteractionInterface {
     colors: Iterable[(Temperature, Color)],
     tile: Tile): Image
 
-  def generateTiles[Data](yearlyData: Iterable[(Year, Data)], generateImage: (Year, Tile, Data) => Unit): Unit
+  def generateTiles[Data](
+    yearlyData: Iterable[(Year, Data)],
+    generateImage: (Year, Tile, Data) => Unit): Unit
+
+  def generateTiles[Data](
+    year: Int, data: Data,
+    generateImage: (Year, Tile, Data) => Unit): Unit
 }
 
 trait VisualizationInterface {
@@ -41,8 +47,14 @@ trait VisualizationInterface {
 
 trait ExtractionInterface {
 
+  def locateStations(stationsFile: String): Seq[((Option[StnId], Option[WbanId]), Location)]
+
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)]
+
+  def locateTemperatures(
+    year: Year, temperaturesFile: String,
+    stationLocations: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(LocalDate, Location, Temperature)]
 
   def locationYearlyAverageRecords(
     records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]

@@ -8,6 +8,14 @@ object Extraction extends ExtractionInterface {
     * 1st milestone: data extraction
     */
 
+  def locateStations(stationsFile: String): Seq[((Option[StnId], Option[WbanId]), Location)] = {
+
+    val stationsLines: List[String] = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
+    stationsLines
+      .map(ExtractionUtils.lineToStationRec)
+      .filter({ case (_, loc) => loc.isValid })
+  }
+
   /**
     * @param year             Year number
     * @param stationsFile     Path of the stations resource file to use (e.g. "/stations.csv")
@@ -21,18 +29,33 @@ object Extraction extends ExtractionInterface {
     val temps: List[((Option[StnId], Option[WbanId]), (Month, Day), Temperature)] =
       tempsLines.map(ExtractionUtils.lineToTempRec)
 
-    val stationsLines: List[String] = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
-    val stations: List[((Option[StnId], Option[WbanId]), Location)] = stationsLines
-      .map(ExtractionUtils.lineToStationRec)
-      .filter({ case (_, loc) => loc.isValid })
+    val stations: Seq[((Option[StnId], Option[WbanId]), Location)] = locateStations(stationsFile)
 
-    val stationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
+    val stationLocations: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
     temps.map({
       case ((stnId, wbanId), (month, day), temp) =>
         val localDate = LocalDate.of(year, month, day)
-        val locOption = stationMap.get((stnId, wbanId))
+        val locOption = stationLocations.get((stnId, wbanId))
         (localDate, locOption, temp)
       })
+      .filter({ case (_, locOption, _) => locOption.nonEmpty })
+      .map({ case (date, locOption, temp) => (date, locOption.get, temp) })
+  }
+
+  def locateTemperatures(
+    year: Year, temperaturesFile: String,
+    stationLocations: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(LocalDate, Location, Temperature)] = {
+
+    val tempsLines: List[String] = Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList
+    val temps: List[((Option[StnId], Option[WbanId]), (Month, Day), Temperature)] =
+      tempsLines.map(ExtractionUtils.lineToTempRec)
+
+    temps.map({
+      case ((stnId, wbanId), (month, day), temp) =>
+        val localDate = LocalDate.of(year, month, day)
+        val locOption = stationLocations.get((stnId, wbanId))
+        (localDate, locOption, temp)
+    })
       .filter({ case (_, locOption, _) => locOption.nonEmpty })
       .map({ case (date, locOption, temp) => (date, locOption.get, temp) })
   }

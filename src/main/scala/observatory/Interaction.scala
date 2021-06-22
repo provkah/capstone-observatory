@@ -14,6 +14,8 @@ object Interaction extends InteractionInterface {
 
   val TileRgbaAlpha = 0.5
 
+  val ZoomLevels: Range.Inclusive = 0 to 3
+
   /**
     * @param tile Tile coordinates
     * @return The latitude and longitude of the top-left corner of the tile, as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -67,13 +69,18 @@ object Interaction extends InteractionInterface {
     yearlyData: Iterable[(Year, Data)],
     generateImage: (Year, Tile, Data) => Unit): Unit = {
 
-    val zoomLevels: Seq[Int] = 0 to 3
     for {
       (year, yearData) <- yearlyData
-      zoom <- zoomLevels
+    } generateTiles(year, yearData, generateImage)
+  }
+
+  def generateTiles[Data](year: Int, data: Data, generateImage: (Year, Tile, Data) => Unit): Unit = {
+
+    for {
+      zoom <- ZoomLevels
       numTiles = pow(2, zoom).toInt
       xTile <- 0 until numTiles
       yTile <- 0 until numTiles
-    } generateImage(year, Tile(xTile, yTile, zoom), yearData)
+    } generateImage(year, Tile(xTile, yTile, zoom), data)
   }
 }

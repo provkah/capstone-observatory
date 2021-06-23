@@ -13,6 +13,10 @@ object Interaction extends InteractionInterface {
   val TileWidth = 256
   val TileHeight = 256
 
+  // number of subtiles in both axis: 2 ** 8 == 256
+  val TileRelativeZoom = 8
+  val TileCoordFactor: Int = pow(2, TileRelativeZoom).toInt
+
   val TileRgbaAlpha = 0.5
 
   val ZoomLevels: Range.Inclusive = 0 to 3
@@ -41,14 +45,10 @@ object Interaction extends InteractionInterface {
     temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)],
     tile: Tile): Image = {
 
-    // number of subtiles in both axis: 2 ** 8 == 256
-    val subtileRelativeZoom = 8
-    val coordFactor = pow(2, subtileRelativeZoom).toInt
+    val subtileZoom = tile.zoom + TileRelativeZoom
 
-    val subtileZoom = tile.zoom + subtileRelativeZoom
-
-    val xStart = tile.x * coordFactor
-    val yStart = tile.y * coordFactor
+    val xStart = tile.x * TileCoordFactor
+    val yStart = tile.y * TileCoordFactor
     val subtileCoords: Seq[(Int, Int)] = for {
       y <- yStart until yStart + TileHeight
       x <- xStart until xStart + TileWidth
@@ -57,10 +57,15 @@ object Interaction extends InteractionInterface {
     val pixelLocations: ParSeq[Location] = subtileCoords.par
       .map({ case (x, y) => tileLocation(Tile(x, y, subtileZoom)) })
 
+    Console.println(s"Constructing pixels, tile $tile")
     val alpha = (TileRgbaAlpha * 256 - 1).toInt
     val pixels: ParIterable[Pixel] = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
+    Console.println(s"Done constructing pixels, tile $tile, pixels: ${pixels.size}")
 
-    Image(TileWidth, TileHeight, pixels.toArray)
+    Console.println(s"Generating image, tile $tile")
+    val image = Image(TileWidth, TileHeight, pixels.toArray)
+    Console.println(s"Done generating image, tile $tile, image $image")
+    image
   }
 
   /**

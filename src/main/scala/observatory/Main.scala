@@ -4,13 +4,17 @@ package observatory
 // import org.apache.spark.{SparkConf, SparkContext}
 // import org.apache.spark.sql.SparkSession
 
-// import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.nio.ImageWriter
 
+import java.io.File
 import java.time.LocalDate
 
 object Main extends App {
 
   val StationsFile = "stations.csv"
+
+  val OutputImageFolder = "target/temperatures"
 
   // Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
@@ -51,6 +55,11 @@ object Main extends App {
         Console.println(s"Generating image, year: $year, tile $tile")
         val image = Interaction.tile(locTemprData, temprColors, tile)
         Console.println(s"Image, year: $year, tile $tile, image $image")
+
+        val imageFileName = s"$OutputImageFolder/$year/${tile.zoom}/${tile.x}-${tile.y}.png"
+        val imageFile = new File(imageFileName)
+        image.output(imageFile)(ImageWriter.default)
+        Console.println(s"Created image file: $imageFileName")
     })
 
     // image: Image = Visualization.visualize(locAvgTemps, temprColorMap)

@@ -8,6 +8,7 @@ import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.nio.ImageWriter
 
 import java.io.File
+import java.nio.file.{Files, Paths}
 import java.time.LocalDate
 
 object Main extends App {
@@ -56,9 +57,16 @@ object Main extends App {
         val image: Image = Interaction.tile(locTemprData, temprColors, tile)
         Console.println(s"Image, year: $year, tile $tile, image $image")
 
-        val imageFileName = s"$OutputImageFolder/$year/${tile.zoom}/${tile.x}-${tile.y}.png"
-        val imageFile = new File(imageFileName)
-        image.output(imageFile)(ImageWriter.default)
+        val imageFolderName = s"$OutputImageFolder/$year/${tile.zoom}"
+        val folderPath = Paths.get(imageFolderName)
+        Files.createDirectories(folderPath)
+        Console.println(s"created, if did not exist, folder: $folderPath")
+
+        val imageFileName = s"$imageFolderName/${tile.x}-${tile.y}.png"
+        val createNewFileResult = new File(imageFolderName).createNewFile()
+        Console.println(s"createNewFileResult: $createNewFileResult")
+
+        image.output(imageFileName)(ImageWriter.default)
         Console.println(s"Created image file: $imageFileName")
     })
 

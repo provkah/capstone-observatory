@@ -53,7 +53,7 @@ object Main extends App {
       year, locAvgTemps,
       (year: Int, tile: Tile, locTemprData: Iterable[(Location, Temperature)]) => {
         Console.println(s"Generating image, year: $year, tile $tile")
-        val image = Interaction.tile(locTemprData, temprColors, tile)
+        val image: Image = Interaction.tile(locTemprData, temprColors, tile)
         Console.println(s"Image, year: $year, tile $tile, image $image")
 
         val imageFileName = s"$OutputImageFolder/$year/${tile.zoom}/${tile.x}-${tile.y}.png"

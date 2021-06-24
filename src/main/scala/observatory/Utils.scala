@@ -7,6 +7,12 @@ import scala.math.{Pi, abs, acos, cos, sin}
 
 object Utils extends UtilsInterface {
 
+  def locationToGridLocation(l: Location): GridLocation = {
+    val gridLat = Math.round(l.lat).toInt.max(GridLocMinLatitude)
+    val gridLon = Math.round(l.lon).toInt.min(GridLocMaxLongitude)
+    GridLocation(gridLat, gridLon)
+  }
+
   def linearInterpolation(p1: Point, p2: Point, x: Double): Double =
     (p1, p2) match {
       case ((x1, y1), (x2, y2)) => y1 + (y2 - y1) / (x2 - x1) * (x - x1)

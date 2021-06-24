@@ -102,6 +102,10 @@ trait UtilsInterface {
 
   val LatitudeMax = 90
   val LongitudeMax = 180
+
+  val GridLocMinLatitude = -89
+  val GridLocMaxLongitude = 179
+
   type Point = (Double, Double)
 
   def locationToGridLocation(l: Location): GridLocation

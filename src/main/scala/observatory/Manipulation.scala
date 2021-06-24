@@ -1,5 +1,7 @@
 package observatory
 
+import scala.collection.mutable
+
 /**
   * 4th milestone: value-added information
   */
@@ -11,7 +13,23 @@ object Manipulation extends ManipulationInterface {
     *         returns the predicted temperature at this location
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
-    ???
+
+    val gridLocTemperatures: Iterable[(GridLocation, Temperature)] = temperatures.map({
+      case (loc, tempr) => (Utils.locationToGridLocation(loc), tempr)
+    })
+    // val gridLocTemperMap: Map[GridLocation, Temperature] = gridLocTemperatures.toMap
+    val gridLocTemperMap: mutable.Map[GridLocation, Temperature] =
+      new mutable.HashMap[GridLocation, Temperature] ++ gridLocTemperatures
+
+    (gridLocation: GridLocation) => {
+      gridLocTemperMap.get(gridLocation) match {
+        case Some(t) => t
+        case None =>
+          val t = Visualization.predictTemperature(temperatures, Location(gridLocation.lat, gridLocation.lon))
+          gridLocTemperMap.+((gridLocation, t))
+          t
+      }
+    }
   }
 
   /**

@@ -68,5 +68,11 @@ object Main extends App {
     // Console.println(s"Created image: $image")
 
     Interaction.generateTiles(year, locAvgTemps, generateImageFile)
+
+    val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemps)
+    Console.println(s"makeGrid created gridLocTemperatureMap")
+    val gridLoc = GridLocation(90, -180)
+    val t = gridLocTemperatureMap(gridLoc)
+    Console.println(s"gridLoc: $gridLoc, temperature: $t")
   }
 }

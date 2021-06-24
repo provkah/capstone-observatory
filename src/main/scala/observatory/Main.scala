@@ -30,6 +30,21 @@ object Main extends App {
   /*val conf: SparkConf = new SparkConf().setMaster("local").setAppName("Observatory")
   val sc: SparkContext = new SparkContext(conf)*/
 
+  def generateImageFile(year: Int, tile: Tile, locTemprData: Iterable[(Location, Temperature)]): Unit = {
+    Console.println(s"Generating image, year: $year, tile $tile")
+    val image: Image = Interaction.tile(locTemprData, temprColors, tile)
+    Console.println(s"Image, year: $year, tile $tile, image $image")
+
+    val imageFolderName = s"$OutputImageFolder/$year/${tile.zoom}"
+    val folderPath = Paths.get(imageFolderName)
+    Files.createDirectories(folderPath)
+    Console.println(s"created, if did not exist, folder: $folderPath")
+
+    val imageFileName = s"$imageFolderName/${tile.x}-${tile.y}.png"
+    image.output(imageFileName)(ImageWriter.default)
+    Console.println(s"Created image file: $imageFileName")
+  }
+
   val stations: Iterable[((Option[StnId], Option[WbanId]), Location)] =
     Extraction.locateStations(s"/$StationsFile")
   Console.println(s"stations size: ${stations.size}")
@@ -49,24 +64,9 @@ object Main extends App {
     val locAvgTemps: Iterable[(Location, Temperature)] = Extraction.locationYearlyAverageRecords(temprRecs)
     Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemps.size}")
 
-    Interaction.generateTiles(
-      year, locAvgTemps,
-      (year: Int, tile: Tile, locTemprData: Iterable[(Location, Temperature)]) => {
-        Console.println(s"Generating image, year: $year, tile $tile")
-        val image: Image = Interaction.tile(locTemprData, temprColors, tile)
-        Console.println(s"Image, year: $year, tile $tile, image $image")
-
-        val imageFolderName = s"$OutputImageFolder/$year/${tile.zoom}"
-        val folderPath = Paths.get(imageFolderName)
-        Files.createDirectories(folderPath)
-        Console.println(s"created, if did not exist, folder: $folderPath")
-
-        val imageFileName = s"$imageFolderName/${tile.x}-${tile.y}.png"
-        image.output(imageFileName)(ImageWriter.default)
-        Console.println(s"Created image file: $imageFileName")
-    })
-
     // image: Image = Visualization.visualize(locAvgTemps, temprColorMap)
     // Console.println(s"Created image: $image")
+
+    Interaction.generateTiles(year, locAvgTemps, generateImageFile)
   }
 }

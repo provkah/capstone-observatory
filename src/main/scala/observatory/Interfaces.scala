@@ -100,8 +100,8 @@ trait UtilsInterface {
   val RgbColorMin = 0
   val RgbColorMax = 255
 
-  val LatitudeMax = 90
-  val LongitudeMax = 180
+  val LatitudeMax = 90.0
+  val LongitudeMax = 180.0
 
   val GridLocMinLatitude = -89
   val GridLocMaxLongitude = 179

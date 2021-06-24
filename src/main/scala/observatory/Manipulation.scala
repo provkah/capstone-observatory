@@ -14,22 +14,36 @@ object Manipulation extends ManipulationInterface {
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
 
-    val gridLocTemperatures: Iterable[(GridLocation, Temperature)] = temperatures.map({
-      case (loc, tempr) => (Utils.locationToGridLocation(loc), tempr)
-    })
-    // val gridLocTemperMap: Map[GridLocation, Temperature] = gridLocTemperatures.toMap
-    val gridLocTemperMap: mutable.Map[GridLocation, Temperature] =
-      new mutable.HashMap[GridLocation, Temperature] ++ gridLocTemperatures
+    def createGridLocTemperMap(
+      temperatures: Iterable[(Location, Temperature)]): mutable.Map[GridLocation, Temperature] = {
 
-    (gridLocation: GridLocation) => {
-      gridLocTemperMap.get(gridLocation) match {
-        case Some(t) => t
-        case None =>
-          val t = Visualization.predictTemperature(temperatures, Location(gridLocation.lat, gridLocation.lon))
-          gridLocTemperMap.+((gridLocation, t))
-          t
-      }
+      val gridLocTemperatures: Iterable[(GridLocation, Temperature)] = temperatures.map({
+        case (loc, tempr) => (Utils.locationToGridLocation(loc), tempr)
+      })
+
+      new mutable.HashMap[GridLocation, Temperature] ++ gridLocTemperatures
     }
+
+    def completeGridLocTemperMapWithPredictedTemperatures(
+      gridLocTemperMap: mutable.Map[GridLocation, Temperature]): mutable.Map[GridLocation, Temperature] = {
+
+      val gridLatRange = Utils.GridLocLatitudeMin to Utils.GridLocLatitudeMax
+      val gridLongRange = Utils.GridLocLongitudeMin to Utils.GridLocLongitudeMax
+      for (lat <- gridLatRange; lon <- gridLongRange) {
+        val gridLoc = GridLocation(lat, lon)
+        if (!gridLocTemperMap.contains(gridLoc)) {
+          val t = Visualization.predictTemperature(temperatures, Location(gridLoc.lat, gridLoc.lon))
+          gridLocTemperMap.+((gridLoc, t))
+        }
+      }
+
+      gridLocTemperMap
+    }
+
+    val gridLocTemperMap: mutable.Map[GridLocation, Temperature] = createGridLocTemperMap(temperatures)
+    completeGridLocTemperMapWithPredictedTemperatures(gridLocTemperMap)
+
+    (gridLocation: GridLocation) => gridLocTemperMap(gridLocation)
   }
 
   /**

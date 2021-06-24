@@ -8,8 +8,8 @@ import scala.math.{Pi, abs, acos, cos, sin}
 object Utils extends UtilsInterface {
 
   def locationToGridLocation(l: Location): GridLocation = {
-    val gridLat = Math.round(l.lat).toInt.max(GridLocMinLatitude)
-    val gridLon = Math.round(l.lon).toInt.min(GridLocMaxLongitude)
+    val gridLat = Math.round(l.lat).toInt.max(GridLocLatitudeMin)
+    val gridLon = Math.round(l.lon).toInt.min(GridLocLongitudeMax)
     GridLocation(gridLat, gridLon)
   }
 

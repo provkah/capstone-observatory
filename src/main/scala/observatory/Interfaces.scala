@@ -99,9 +99,12 @@ trait UtilsInterface {
 
   val RgbColorMin = 0
   val RgbColorMax = 255
+
   val LatitudeMax = 90
   val LongitudeMax = 180
   type Point = (Double, Double)
+
+  def locationToGridLocation(l: Location): GridLocation
 
   def linearInterpolation(p1: Point, p2: Point, x: Double): Double
 

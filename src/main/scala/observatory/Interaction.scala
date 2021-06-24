@@ -45,17 +45,17 @@ object Interaction extends InteractionInterface {
     temperatures: Iterable[(Location, Temperature)], colors: Iterable[(Temperature, Color)],
     tile: Tile): Image = {
 
-    val subtileZoom = tile.zoom + TileRelativeZoom
+    val tileZoom = tile.zoom + TileRelativeZoom
 
     val xStart = tile.x * TileCoordFactor
     val yStart = tile.y * TileCoordFactor
-    val subtileCoords: Seq[(Int, Int)] = for {
+    val tileCoords: Seq[(Int, Int)] = for {
       y <- yStart until yStart + TileHeight
       x <- xStart until xStart + TileWidth
     } yield (x, y)
 
-    val pixelLocations: ParSeq[Location] = subtileCoords.par
-      .map({ case (x, y) => tileLocation(Tile(x, y, subtileZoom)) })
+    val pixelLocations: ParSeq[Location] = tileCoords.par
+      .map({ case (x, y) => tileLocation(Tile(x, y, tileZoom)) })
 
     Console.println(s"Constructing pixels, tile $tile")
     val alpha = (TileRgbaAlpha * 256 - 1).toInt

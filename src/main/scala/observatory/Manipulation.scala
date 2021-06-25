@@ -33,7 +33,6 @@ object Manipulation extends ManipulationInterface {
 
     val temperaturesForPredictions = gridLockTemperatures
       .map({ case (gl, t) => (Location(gl.lat, gl.lon), t )})
-
     Console.println(s"temperaturesForPredictions: ${temperaturesForPredictions.size}")
 
     (gridLoc: GridLocation) => {

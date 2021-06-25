@@ -1,6 +1,7 @@
 package observatory
 
-import scala.collection.mutable
+import scala.collection.parallel.ParIterable
+import scala.collection.{immutable, mutable}
 
 /**
   * 4th milestone: value-added information
@@ -14,17 +15,22 @@ object Manipulation extends ManipulationInterface {
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
 
+    def getGridLockTemperatures(
+      temperatures: Iterable[(Location, Temperature)]): immutable.Seq[(GridLocation, Temperature)] = {
+
+      def averageTemperature(locTemperatures: ParIterable[(GridLocation, Temperature)]): Temperature =
+        locTemperatures.map({ case (_, t) => t }).fold(0.0)(_ + _) / locTemperatures.size
+
+      val gridLocTemperatures = temperatures.map({ case (l, t) => (Utils.locationToGridLocation(l), t) })
+      val gridLocTemperaturesByLoc = gridLocTemperatures.par.groupBy({ case (l, _) => l })
+      gridLocTemperaturesByLoc
+        .mapValues(averageTemperature)
+        .toList
+    }
+
     Console.println(s"temperatures: ${temperatures.size}")
 
-    val gridLockSet = temperatures
-      .map({ case (l, _) => Utils.locationToGridLocation(l) })
-      .toSet
-    Console.println(s"gridLockSet: ${gridLockSet.size}")
-
-    val gridLockTemperatures = gridLockSet
-      .par
-      .map(l => (l, Visualization.predictTemperature(temperatures, Location(l.lat, l.lon))))
-      .toList
+    val gridLockTemperatures = getGridLockTemperatures(temperatures)
     Console.println(s"gridLockTemperatures: ${gridLockTemperatures.size}")
 
     val gridLocTemperatureMap = new mutable.HashMap[GridLocation, Temperature]

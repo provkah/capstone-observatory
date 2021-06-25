@@ -1,6 +1,9 @@
 package observatory
 
-import scala.collection.mutable
+import scala.collection.parallel
+import scala.collection.parallel.ParIterable
+import scala.collection.parallel.immutable.ParMap
+import scala.collection.parallel.mutable.ParHashMap
 
 /**
   * 4th milestone: value-added information
@@ -15,40 +18,47 @@ object Manipulation extends ManipulationInterface {
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
 
     def createGridLocTemperMap(
-      temperatures: Iterable[(Location, Temperature)]): mutable.Map[GridLocation, Temperature] = {
+      temperatures: Iterable[(Location, Temperature)]): ParHashMap[GridLocation, Temperature] = {
 
-      val gridLocTemperatures: Iterable[(GridLocation, Temperature)] = temperatures.map({
+      val gridLocTemperatures: ParIterable[(GridLocation, Temperature)] = temperatures.par.map({
         case (loc, tempr) => (Utils.locationToGridLocation(loc), tempr)
       })
 
-      val map = new mutable.HashMap[GridLocation, Temperature]
-      map ++= gridLocTemperatures
+      val gridLocTemperaturesMap: ParMap[GridLocation, ParIterable[(GridLocation, Temperature)]] =
+        gridLocTemperatures.groupBy({ case (loc, _) => loc })
+      val gridLocAvgTemperatureMap: parallel.ParMap[GridLocation, Temperature] =
+        gridLocTemperaturesMap.mapValues(s => s.map({ case (_, t) => t }).fold(0.0)(_ + _) / s.size)
+
+      val map: ParHashMap[GridLocation, Temperature] = new collection.mutable.HashMap[GridLocation, Temperature].par
+      map ++= gridLocAvgTemperatureMap.toList
     }
 
-    def completeGridLocTemperMapWithPredictedTemperatures(
-      gridLocTemperMap: mutable.Map[GridLocation, Temperature]): mutable.Map[GridLocation, Temperature] = {
+    def createTemperaturesForPredictions(
+      gridLocTemperMap: ParHashMap[GridLocation, Temperature]): Iterable[(Location, Temperature)] = {
 
-      val gridLatRange = Utils.GridLocLatitudeMin to Utils.GridLocLatitudeMax
-      val gridLongRange = Utils.GridLocLongitudeMin to Utils.GridLocLongitudeMax
-      for (lat <- gridLatRange; lon <- gridLongRange) {
-        val gridLoc = GridLocation(lat, lon)
-        if (!gridLocTemperMap.contains(gridLoc)) {
-          val t = Visualization.predictTemperature(temperatures, Location(gridLoc.lat, gridLoc.lon))
-          gridLocTemperMap += (gridLoc, t)
-        }
-      }
-
-      gridLocTemperMap
+      val locTemperatureMap: ParHashMap[Location, Temperature] =
+        gridLocTemperMap.map({ case (gridLoc, t) => (Location(gridLoc.lat, gridLoc.lon), t) } )
+      locTemperatureMap.toList
     }
 
     Console.println(s"temperatures: ${temperatures.size}")
 
-    val gridLocTemperMap: mutable.Map[GridLocation, Temperature] = createGridLocTemperMap(temperatures)
+    val gridLocTemperMap: ParHashMap[GridLocation, Temperature] = createGridLocTemperMap(temperatures)
     Console.println(s"gridLocTemperMap: ${gridLocTemperMap.size}")
-    completeGridLocTemperMapWithPredictedTemperatures(gridLocTemperMap)
-    Console.println(s"gridLocTemperMap completed: ${gridLocTemperMap.size}")
 
-    (gridLocation: GridLocation) => gridLocTemperMap(gridLocation)
+    val temperaturesForPredictions: Iterable[(Location, Temperature)] = createTemperaturesForPredictions(gridLocTemperMap)
+    Console.println(s"temperaturesForPredictions: ${temperaturesForPredictions.size}")
+
+    (gridLoc: GridLocation) => {
+      gridLocTemperMap.get(gridLoc) match {
+        case Some(t) => t
+        case None =>
+          val loc = Location(gridLoc.lat, gridLoc.lon)
+          val t = Visualization.predictTemperature(temperaturesForPredictions, loc)
+          gridLocTemperMap += ((gridLoc, t))
+          t
+      }
+    }
   }
 
   /**

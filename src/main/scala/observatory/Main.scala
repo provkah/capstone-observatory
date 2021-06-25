@@ -67,12 +67,21 @@ object Main extends App {
     // image: Image = Visualization.visualize(locAvgTemps, temprColorMap)
     // Console.println(s"Created image: $image")
 
-    Interaction.generateTiles(year, locAvgTemps, generateImageFile)
+    // Interaction.generateTiles(year, locAvgTemps, generateImageFile)
 
     val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemps)
-    Console.println(s"makeGrid created gridLocTemperatureMap")
-    val gridLoc = GridLocation(90, -180)
-    val t = gridLocTemperatureMap(gridLoc)
-    Console.println(s"gridLoc: $gridLoc, temperature: $t")
+    Console.println(s"makeGrid gridLocTemperatureMap")
+
+    val gridLocs: Seq[GridLocation] = for {
+      lat <- Utils.GridLocLatitudeMin to Utils.GridLocLatitudeMax
+      lon <- Utils.GridLocLongitudeMin to Utils.GridLocLongitudeMax
+    } yield GridLocation(lat, lon)
+    Console.println(s"gridLocs: ${gridLocs.size}")
+
+    gridLocs.foreach(gridLocTemperatureMap)
+    Console.println("Completed gridLocTemperatureMap")
+
+    val temperatures = for (gridLock <- gridLocs) yield gridLocTemperatureMap(gridLock)
+    Console.println(s"temperatures: ${temperatures.size}")
   }
 }

@@ -17,7 +17,7 @@ object Manipulation extends ManipulationInterface {
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
 
-    def createGridLocTemperMap(
+    def initialGridLocTemperatureMap(
       temperatures: Iterable[(Location, Temperature)]): ParHashMap[GridLocation, Temperature] = {
 
       val gridLocTemperatures: ParIterable[(GridLocation, Temperature)] = temperatures.par.map({
@@ -44,7 +44,7 @@ object Manipulation extends ManipulationInterface {
     Console.println(s"temperatures: ${temperatures.size}")
 
     val gridLocTemperatureMap: ParHashMap[GridLocation, Temperature] =
-      createGridLocTemperMap(temperatures)
+      initialGridLocTemperatureMap(temperatures)
     Console.println(s"gridLocTemperatureMap: ${gridLocTemperatureMap.size}")
 
     val temperaturesForPredictions: Iterable[(Location, Temperature)] =

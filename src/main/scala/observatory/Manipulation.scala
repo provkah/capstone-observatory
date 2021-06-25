@@ -1,8 +1,5 @@
 package observatory
 
-import scala.collection.parallel
-import scala.collection.parallel.ParIterable
-import scala.collection.parallel.immutable.ParMap
 import scala.collection.parallel.mutable.ParHashMap
 
 /**
@@ -17,38 +14,24 @@ object Manipulation extends ManipulationInterface {
     */
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
 
-    def initialGridLocTemperatureMap(
-      temperatures: Iterable[(Location, Temperature)]): ParHashMap[GridLocation, Temperature] = {
-
-      val gridLocTemperatures: ParIterable[(GridLocation, Temperature)] = temperatures.par.map({
-        case (loc, t) => (Utils.locationToGridLocation(loc), t)
-      })
-
-      val gridLocTemperaturesMap: ParMap[GridLocation, ParIterable[(GridLocation, Temperature)]] =
-        gridLocTemperatures.groupBy({ case (loc, _) => loc })
-      val gridLocAvgTemperatureMap: parallel.ParMap[GridLocation, Temperature] =
-        gridLocTemperaturesMap.mapValues(s => s.map({ case (_, t) => t }).fold(0.0)(_ + _) / s.size)
-
-      val map: ParHashMap[GridLocation, Temperature] = new collection.mutable.HashMap[GridLocation, Temperature].par
-      map ++= gridLocAvgTemperatureMap.toList
-    }
-
-    def createTemperaturesForPredictions(
-      gridLocTemperMap: ParHashMap[GridLocation, Temperature]): Iterable[(Location, Temperature)] = {
-
-      val locTemperatureMap: ParHashMap[Location, Temperature] =
-        gridLocTemperMap.map({ case (gridLoc, t) => (Location(gridLoc.lat, gridLoc.lon), t) } )
-      locTemperatureMap.toList
-    }
-
     Console.println(s"temperatures: ${temperatures.size}")
 
+    val gridLockSet = temperatures
+      .map({ case (l, _) => Utils.locationToGridLocation(l) })
+      .toSet
+    Console.println(s"gridLockSet: ${gridLockSet.size}")
+
+    val gridLockTemperatureSet = gridLockSet
+      .map(l => (l, Visualization.predictTemperature(temperatures, Location(l.lat, l.lon))))
+    Console.println(s"gridLockTemperatureSet: ${gridLockTemperatureSet.size}")
+
     val gridLocTemperatureMap: ParHashMap[GridLocation, Temperature] =
-      initialGridLocTemperatureMap(temperatures)
+      new collection.mutable.HashMap[GridLocation, Temperature].par
+    gridLocTemperatureMap ++= gridLockTemperatureSet
     Console.println(s"gridLocTemperatureMap: ${gridLocTemperatureMap.size}")
 
     val temperaturesForPredictions: Iterable[(Location, Temperature)] =
-      createTemperaturesForPredictions(gridLocTemperatureMap)
+      gridLockTemperatureSet.map({ case (gl, t) => (Location(gl.lat, gl.lon), t )})
     Console.println(s"temperaturesForPredictions: ${temperaturesForPredictions.size}")
 
     (gridLoc: GridLocation) => {

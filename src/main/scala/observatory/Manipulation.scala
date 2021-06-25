@@ -43,19 +43,21 @@ object Manipulation extends ManipulationInterface {
 
     Console.println(s"temperatures: ${temperatures.size}")
 
-    val gridLocTemperMap: ParHashMap[GridLocation, Temperature] = createGridLocTemperMap(temperatures)
-    Console.println(s"gridLocTemperMap: ${gridLocTemperMap.size}")
+    val gridLocTemperatureMap: ParHashMap[GridLocation, Temperature] =
+      createGridLocTemperMap(temperatures)
+    Console.println(s"gridLocTemperatureMap: ${gridLocTemperatureMap.size}")
 
-    val temperaturesForPredictions: Iterable[(Location, Temperature)] = createTemperaturesForPredictions(gridLocTemperMap)
+    val temperaturesForPredictions: Iterable[(Location, Temperature)] =
+      createTemperaturesForPredictions(gridLocTemperatureMap)
     Console.println(s"temperaturesForPredictions: ${temperaturesForPredictions.size}")
 
     (gridLoc: GridLocation) => {
-      gridLocTemperMap.get(gridLoc) match {
+      gridLocTemperatureMap.get(gridLoc) match {
         case Some(t) => t
         case None =>
           val loc = Location(gridLoc.lat, gridLoc.lon)
           val t = Visualization.predictTemperature(temperaturesForPredictions, loc)
-          gridLocTemperMap += ((gridLoc, t))
+          gridLocTemperatureMap += ((gridLoc, t))
           t
       }
     }

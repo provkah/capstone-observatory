@@ -1,6 +1,6 @@
 package observatory
 
-import scala.collection.parallel.mutable.ParHashMap
+import scala.collection.mutable
 
 /**
   * 4th milestone: value-added information
@@ -22,25 +22,31 @@ object Manipulation extends ManipulationInterface {
     Console.println(s"gridLockSet: ${gridLockSet.size}")
 
     val gridLockTemperatureSet = gridLockSet
+      .par
       .map(l => (l, Visualization.predictTemperature(temperatures, Location(l.lat, l.lon))))
     Console.println(s"gridLockTemperatureSet: ${gridLockTemperatureSet.size}")
 
-    val gridLocTemperatureMap: ParHashMap[GridLocation, Temperature] =
-      new collection.mutable.HashMap[GridLocation, Temperature].par
-    gridLocTemperatureMap ++= gridLockTemperatureSet
+    val gridLocTemperatureMap = new mutable.HashMap[GridLocation, Temperature]
+    gridLocTemperatureMap ++= gridLockTemperatureSet.toList
     Console.println(s"gridLocTemperatureMap: ${gridLocTemperatureMap.size}")
 
-    val temperaturesForPredictions: Iterable[(Location, Temperature)] =
-      gridLockTemperatureSet.map({ case (gl, t) => (Location(gl.lat, gl.lon), t )})
+    val temperaturesForPredictions = gridLockTemperatureSet
+      .map({ case (gl, t) => (Location(gl.lat, gl.lon), t )})
+      .toList
     Console.println(s"temperaturesForPredictions: ${temperaturesForPredictions.size}")
 
     (gridLoc: GridLocation) => {
-      gridLocTemperatureMap.get(gridLoc) match {
+      val temperatureOpt = synchronized {
+        gridLocTemperatureMap.get(gridLoc)
+      }
+      temperatureOpt match {
         case Some(t) => t
         case None =>
           val loc = Location(gridLoc.lat, gridLoc.lon)
           val t = Visualization.predictTemperature(temperaturesForPredictions, loc)
-          gridLocTemperatureMap += ((gridLoc, t))
+          synchronized {
+            gridLocTemperatureMap += ((gridLoc, t))
+          }
           t
       }
     }

@@ -21,7 +21,8 @@ object Manipulation extends ManipulationInterface {
         case (loc, tempr) => (Utils.locationToGridLocation(loc), tempr)
       })
 
-      new mutable.HashMap[GridLocation, Temperature] ++ gridLocTemperatures
+      val map = new mutable.HashMap[GridLocation, Temperature]
+      map ++= gridLocTemperatures
     }
 
     def completeGridLocTemperMapWithPredictedTemperatures(
@@ -33,15 +34,19 @@ object Manipulation extends ManipulationInterface {
         val gridLoc = GridLocation(lat, lon)
         if (!gridLocTemperMap.contains(gridLoc)) {
           val t = Visualization.predictTemperature(temperatures, Location(gridLoc.lat, gridLoc.lon))
-          gridLocTemperMap.+((gridLoc, t))
+          gridLocTemperMap += (gridLoc, t)
         }
       }
 
       gridLocTemperMap
     }
 
+    Console.println(s"temperatures: ${temperatures.size}")
+
     val gridLocTemperMap: mutable.Map[GridLocation, Temperature] = createGridLocTemperMap(temperatures)
+    Console.println(s"gridLocTemperMap: ${gridLocTemperMap.size}")
     completeGridLocTemperMapWithPredictedTemperatures(gridLocTemperMap)
+    Console.println(s"gridLocTemperMap completed: ${gridLocTemperMap.size}")
 
     (gridLocation: GridLocation) => gridLocTemperMap(gridLocation)
   }

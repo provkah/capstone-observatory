@@ -2,7 +2,8 @@ package observatory
 
 object ExtractionUtils extends ExtractionUtilsInterface {
 
-  def lineToTempRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature) = {
+  def lineToTemperatureRec(
+    line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature) = {
 
     val fields = line.split(",")
     if (fields.length != TempsNumFields) sys.error(s"Temperatures file line must have $TempsNumFields fields. Found line with ${fields.length}.")

@@ -90,7 +90,7 @@ trait ExtractionUtilsInterface {
 
   val NoTempStr = "9999.9"
 
-  def lineToTempRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature)
+  def lineToTemperatureRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature)
 
   def lineToStationRec(line: String): ((Option[StnId], Option[WbanId]), Location)
 }

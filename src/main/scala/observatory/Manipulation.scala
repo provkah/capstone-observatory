@@ -21,7 +21,7 @@ object Manipulation extends ManipulationInterface {
       temperatures: Iterable[(Location, Temperature)]): ParHashMap[GridLocation, Temperature] = {
 
       val gridLocTemperatures: ParIterable[(GridLocation, Temperature)] = temperatures.par.map({
-        case (loc, tempr) => (Utils.locationToGridLocation(loc), tempr)
+        case (loc, t) => (Utils.locationToGridLocation(loc), t)
       })
 
       val gridLocTemperaturesMap: ParMap[GridLocation, ParIterable[(GridLocation, Temperature)]] =

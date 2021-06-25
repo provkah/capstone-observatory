@@ -28,32 +28,31 @@ object Visualization extends VisualizationInterface {
 
     if (temperatures.isEmpty) sys.error("temperatures collection is empty")
 
-    if (temperatures.size == 1) temperatures.head match { case (_, tempr) => tempr }
+    if (temperatures.size == 1) temperatures.head match { case (_, t) => t }
     else {
       val locTemperatures: ParIterable[(Location, Temperature)] = temperatures.par
 
-      val tempExactLocOpt: Option[(Location, Temperature)] = locTemperatures
+      val locTempreratureExactLocOpt: Option[(Location, Temperature)] = locTemperatures
         .find({ case (loc, _) => loc == location })
-      if (tempExactLocOpt.nonEmpty) tempExactLocOpt.get match { case (_, tempr ) => tempr }
+      if (locTempreratureExactLocOpt.nonEmpty) locTempreratureExactLocOpt.get match { case (_, t ) => t }
       else {
-        val distTemprs: ParIterable[(Double, Temperature)] = locTemperatures
-          .map({ case (loc, tempr) =>
+        val distTemperatures: ParIterable[(Double, Temperature)] = locTemperatures
+          .map({ case (loc, t) =>
             val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
-            val dist = EarthRadiusKm * centralAngle
-            (dist, tempr)
+            (EarthRadiusKm * centralAngle, t)
           })
 
-        val distTemprThresholdOpt: Option[(Double, Temperature)] = distTemprs
-          .find({ case (dist, _) => dist <= DistanceThresholdKm } )
-        if (distTemprThresholdOpt.nonEmpty) distTemprThresholdOpt.get match { case (_, tempr ) => tempr }
+        val closeDistTemperature: ParIterable[(Double, Temperature)] =
+          distTemperatures.filter({ case (d, _) => d <= DistanceThresholdKm })
+        if (closeDistTemperature.nonEmpty) closeDistTemperature.minBy({ case (d, _) => d }) match { case (_, t) => t }
         else {
-          val distWeights: ParIterable[Double] = distTemprs
+          val distWeights: ParIterable[Double] = distTemperatures
             .map({ case (dist, _) => 1.0D / pow(dist, InverseDistanceWeighingPower) })
 
           val sumOfWeights = distWeights.fold(0.0D)(_ + _)
 
           locTemperatures
-            .zip(distWeights).map({ case ((_, tempr), weight) => weight * tempr })
+            .zip(distWeights).map({ case ((_, t), w) => w * t })
             .fold(0.0D)(_ + _) / sumOfWeights
         }
       }
@@ -70,24 +69,24 @@ object Visualization extends VisualizationInterface {
     if (points.isEmpty) sys.error("points collection must not be empty")
 
     if (points.size == 1) {
-      val (tempr, color) = points.head
-      if (tempr == value) color
+      val (temperature, color) = points.head
+      if (temperature == value) color
       else sys.error("points collection must have at least 2 items for interpolation")
     } else {
 
-      val temprColorMap: Map[Temperature, Color] = points.toMap
+      val temperatureColorMap: Map[Temperature, Color] = points.toMap
 
-      val colorOpt: Option[Color] = temprColorMap.get(value)
+      val colorOpt: Option[Color] = temperatureColorMap.get(value)
       if (colorOpt.nonEmpty) colorOpt.get
       else {
-        val temprSorted: Array[Temperature] = temprColorMap.keys.toArray.sorted
+        val temperaturesSorted: Array[Temperature] = temperatureColorMap.keys.toArray.sorted
 
-        val (idx1, idx2) = Utils.findPointsForLinearInterpolation(temprSorted, value)
+        val (idx1, idx2) = Utils.findPointsForLinearInterpolation(temperaturesSorted, value)
 
-        val t1 = temprSorted(idx1)
-        val t2 = temprSorted(idx2)
-        val c1 = temprColorMap(t1)
-        val c2 = temprColorMap(t2)
+        val t1 = temperaturesSorted(idx1)
+        val t2 = temperaturesSorted(idx2)
+        val c1 = temperatureColorMap(t1)
+        val c2 = temperatureColorMap(t2)
 
         val red = Utils.linearInterpolation((t1, c1.red.toDouble), (t2, c2.red.toDouble), value)
         val green = Utils.linearInterpolation((t1, c1.green.toDouble), (t2, c2.green.toDouble), value)

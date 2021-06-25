@@ -38,12 +38,12 @@ object Extraction extends ExtractionInterface {
     year: Year, temperaturesFile: String,
     stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(LocalDate, Location, Temperature)] = {
 
-    val tempsLines: ParSeq[String] =
+    val lines: ParSeq[String] =
       Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList.par
-    val temps: ParSeq[((Option[StnId], Option[WbanId]), (Month, Day), Temperature)] =
-      tempsLines.map(ExtractionUtils.lineToTempRec)
+    val temperatureRecs: ParSeq[((Option[StnId], Option[WbanId]), (Month, Day), Temperature)] =
+      lines.map(ExtractionUtils.lineToTemperatureRec)
 
-    temps.map({ case ((stnId, wbanId), (month, day), temp) =>
+    temperatureRecs.map({ case ((stnId, wbanId), (month, day), temp) =>
         val localDate = LocalDate.of(year, month, day)
         val locOption = stationLocationMap.get((stnId, wbanId))
         (localDate, locOption, temp)

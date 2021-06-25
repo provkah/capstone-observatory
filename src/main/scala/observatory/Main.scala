@@ -16,6 +16,9 @@ object Main extends App {
 
   val OutputImageFolder = "target/temperatures"
 
+  val temperatureColors: Iterable[(Temperature, Color)] =
+    for (c <- 0 to 255) yield (c - 128.0, Color(c, 255 - c, c))
+
   // Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
   /*val spark: SparkSession =
@@ -30,9 +33,12 @@ object Main extends App {
   /*val conf: SparkConf = new SparkConf().setMaster("local").setAppName("Observatory")
   val sc: SparkContext = new SparkContext(conf)*/
 
-  def generateImageFile(year: Int, tile: Tile, locTemprData: Iterable[(Location, Temperature)]): Unit = {
+  def generateImageFile(
+    year: Int, tile: Tile,
+    locTemperatureData: Iterable[(Location, Temperature)]): Unit = {
+
     Console.println(s"Generating image, year: $year, tile $tile")
-    val image: Image = Interaction.tile(locTemprData, temprColors, tile)
+    val image: Image = Interaction.tile(locTemperatureData, temperatureColors, tile)
     Console.println(s"Image, year: $year, tile $tile, image $image")
 
     val imageFolderName = s"$OutputImageFolder/$year/${tile.zoom}"
@@ -50,21 +56,19 @@ object Main extends App {
   Console.println(s"stations size: ${stations.size}")
   val stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap.seq
 
-  val temprColors: Seq[(Temperature, Color)] =
-    for (c <- 0 to 255) yield (c - 128.0, Color(c, 255 - c, c))
-
   val years: Range = 2014 to 2015
   for (year <- years) {
     Console.println(s"Year: $year")
 
-    val temprRecs: Iterable[(LocalDate, Location, Temperature)] = Extraction.locateTemperatures(
+    val temperatureRecs: Iterable[(LocalDate, Location, Temperature)] = Extraction.locateTemperatures(
       year, s"/$year.csv", stationLocationMap)
-    Console.println(s"Year: $year, temprRecs size: ${temprRecs.size}")
+    Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
 
-    val locAvgTemps: Iterable[(Location, Temperature)] = Extraction.locationYearlyAverageRecords(temprRecs)
+    val locAvgTemps: Iterable[(Location, Temperature)] =
+      Extraction.locationYearlyAverageRecords(temperatureRecs)
     Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemps.size}")
 
-    // image: Image = Visualization.visualize(locAvgTemps, temprColorMap)
+    // val image: Image = Visualization.visualize(locAvgTemps, temperatureColors)
     // Console.println(s"Created image: $image")
 
     // Interaction.generateTiles(year, locAvgTemps, generateImageFile)

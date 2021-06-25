@@ -21,18 +21,19 @@ object Manipulation extends ManipulationInterface {
       .toSet
     Console.println(s"gridLockSet: ${gridLockSet.size}")
 
-    val gridLockTemperatureSet = gridLockSet
+    val gridLockTemperatures = gridLockSet
       .par
       .map(l => (l, Visualization.predictTemperature(temperatures, Location(l.lat, l.lon))))
-    Console.println(s"gridLockTemperatureSet: ${gridLockTemperatureSet.size}")
+      .toList
+    Console.println(s"gridLockTemperatures: ${gridLockTemperatures.size}")
 
     val gridLocTemperatureMap = new mutable.HashMap[GridLocation, Temperature]
-    gridLocTemperatureMap ++= gridLockTemperatureSet.toList
+    gridLocTemperatureMap ++= gridLockTemperatures
     Console.println(s"gridLocTemperatureMap: ${gridLocTemperatureMap.size}")
 
-    val temperaturesForPredictions = gridLockTemperatureSet
+    val temperaturesForPredictions = gridLockTemperatures
       .map({ case (gl, t) => (Location(gl.lat, gl.lon), t )})
-      .toList
+
     Console.println(s"temperaturesForPredictions: ${temperaturesForPredictions.size}")
 
     (gridLoc: GridLocation) => {

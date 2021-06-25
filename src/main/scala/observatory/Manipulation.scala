@@ -1,7 +1,6 @@
 package observatory
 
-import scala.collection.parallel.ParIterable
-import scala.collection.{immutable, mutable}
+import scala.collection.{mutable}
 
 /**
   * 4th milestone: value-added information
@@ -16,15 +15,13 @@ object Manipulation extends ManipulationInterface {
   def makeGrid(temperatures: Iterable[(Location, Temperature)]): GridLocation => Temperature = {
 
     def getGridLockTemperatures(
-      temperatures: Iterable[(Location, Temperature)]): immutable.Seq[(GridLocation, Temperature)] = {
-
-      def averageTemperature(locTemperatures: ParIterable[(GridLocation, Temperature)]): Temperature =
-        locTemperatures.map({ case (_, t) => t }).fold(0.0)(_ + _) / locTemperatures.size
+      temperatures: Iterable[(Location, Temperature)]): Iterable[(GridLocation, Temperature)] = {
 
       val gridLocTemperatures = temperatures.map({ case (l, t) => (Utils.locationToGridLocation(l), t) })
       val gridLocTemperaturesByLoc = gridLocTemperatures.par.groupBy({ case (l, _) => l })
       gridLocTemperaturesByLoc
-        .mapValues(averageTemperature)
+        .mapValues(_.map{ case (_, t) => t })
+        .mapValues(Utils.average)
         .toList
     }
 

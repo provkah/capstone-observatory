@@ -123,6 +123,10 @@ trait UtilsInterface {
 
   def angleDegreesToRadians(angleInDegrees: Double): Double
 
+  def average(values: Iterable[Double]): Double
+
+  def average(values: ParIterable[Double]): Double
+
   def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double
 
   def getLinesIteratorFromResFile(resFile: String, classObj: Class[_]): Iterator[String]

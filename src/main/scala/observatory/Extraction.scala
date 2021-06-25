@@ -1,7 +1,6 @@
 package observatory
 
 import java.time.LocalDate
-import scala.collection.parallel.{ParIterable, ParMap, ParSeq}
 
 object Extraction extends ExtractionInterface {
 
@@ -11,12 +10,11 @@ object Extraction extends ExtractionInterface {
 
   def locateStations(stationsFile: String): Iterable[((Option[StnId], Option[WbanId]), Location)] = {
 
-    val stationsLines: ParSeq[String] =
-      Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList.par
-    stationsLines
+    val lines = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
+    lines.par
       .map(ExtractionUtils.lineToStationRec)
       .filter({ case (_, loc) => loc.isValid })
-      .seq
+      .toList
   }
 
   /**
@@ -28,9 +26,7 @@ object Extraction extends ExtractionInterface {
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)] = {
 
-    val stations: Iterable[((Option[StnId], Option[WbanId]), Location)] = locateStations(stationsFile)
-    val stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
-
+    val stationLocationMap = locateStations(stationsFile).toMap
     locateTemperatures(year, temperaturesFile, stationLocationMap)
   }
 
@@ -38,10 +34,9 @@ object Extraction extends ExtractionInterface {
     year: Year, temperaturesFile: String,
     stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(LocalDate, Location, Temperature)] = {
 
-    val lines: ParSeq[String] =
-      Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList.par
-    val temperatureRecs: ParSeq[((Option[StnId], Option[WbanId]), (Month, Day), Temperature)] =
-      lines.map(ExtractionUtils.lineToTemperatureRec)
+    val lines = Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList
+    val temperatureRecs = lines.par
+      .map(ExtractionUtils.lineToTemperatureRec)
 
     temperatureRecs.map({ case ((stnId, wbanId), (month, day), temp) =>
         val localDate = LocalDate.of(year, month, day)
@@ -50,7 +45,7 @@ object Extraction extends ExtractionInterface {
       })
       .filter({ case (_, locOption, _) => locOption.nonEmpty })
       .map({ case (date, locOption, temp) => (date, locOption.get, temp) })
-      .seq
+      .toList
   }
 
   /**
@@ -60,10 +55,10 @@ object Extraction extends ExtractionInterface {
   def locationYearlyAverageRecords(
     records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)] = {
 
-    val recordsByLoc: ParMap[Location, ParIterable[(LocalDate, Location, Temperature)]] = records.par
-      .groupBy({ case (_, loc, _) => loc })
-    val tempsByLoc: ParMap[Location, ParIterable[Temperature]] = recordsByLoc
-      .map({ case (loc, recs) => (loc, recs.map({ case (_, _, temp) => temp })) })
-    tempsByLoc.map({ case (loc, temps) => (loc, temps.fold(0D)(_ + _) / temps.size) }).seq
+    val recordsByLoc = records.par.groupBy({ case (_, loc, _) => loc })
+    val tempsByLoc = recordsByLoc.map({ case (loc, recs) => (loc, recs.map({ case (_, _, temp) => temp })) })
+    tempsByLoc
+      .map({ case (loc, temperatures) => (loc, Utils.average(temperatures)) })
+      .toList
   }
 }

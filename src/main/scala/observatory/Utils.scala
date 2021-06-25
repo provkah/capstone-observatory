@@ -2,6 +2,7 @@ package observatory
 
 import java.io.InputStream
 import scala.annotation.tailrec
+import scala.collection.parallel.ParIterable
 import scala.io.{BufferedSource, Source}
 import scala.math.{Pi, abs, acos, cos, sin}
 
@@ -63,6 +64,10 @@ object Utils extends UtilsInterface {
   def clipRgbColor(color: Int): Int = color.min(RgbColorMax).max(RgbColorMin)
 
   def angleDegreesToRadians(angleInDegrees: Double): Double = angleInDegrees / 180.0 * Pi
+
+  def average(values: Iterable[Double]): Double = values.fold(0.0)(_ + _) / values.size
+
+  def average(values: ParIterable[Double]): Double = values.fold(0.0)(_ + _) / values.size
 
   def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double =
     (degreesFahrenheit - 32) / 1.8

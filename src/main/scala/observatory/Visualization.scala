@@ -3,7 +3,7 @@ package observatory
 import com.sksamuel.scrimage.{Image, Pixel}
 
 import scala.collection.parallel.ParIterable
-import scala.math.{pow, round}
+import scala.math.round
 
 /**
   * 2nd milestone: basic visualization
@@ -30,32 +30,11 @@ object Visualization extends VisualizationInterface {
 
     if (temperatures.size == 1) temperatures.head match { case (_, t) => t }
     else {
-      val locTemperatures: ParIterable[(Location, Temperature)] = temperatures.par
-
-      val locTempreratureExactLocOpt: Option[(Location, Temperature)] = locTemperatures
-        .find({ case (loc, _) => loc == location })
-      if (locTempreratureExactLocOpt.nonEmpty) locTempreratureExactLocOpt.get match { case (_, t ) => t }
-      else {
-        val distTemperatures: ParIterable[(Double, Temperature)] = locTemperatures
-          .map({ case (loc, t) =>
-            val centralAngle =  Utils.greatCircleDistanceCentralAngle(location, loc)
-            (EarthRadiusKm * centralAngle, t)
-          })
-
-        val closeDistTemperature: ParIterable[(Double, Temperature)] =
-          distTemperatures.filter({ case (d, _) => d <= DistanceThresholdKm })
-        if (closeDistTemperature.nonEmpty) closeDistTemperature.minBy({ case (d, _) => d }) match { case (_, t) => t }
-        else {
-          val distWeights: ParIterable[Double] = distTemperatures
-            .map({ case (dist, _) => 1.0D / pow(dist, InverseDistanceWeighingPower) })
-
-          val sumOfWeights = distWeights.fold(0.0D)(_ + _)
-
-          locTemperatures
-            .zip(distWeights).map({ case ((_, t), w) => w * t })
-            .fold(0.0D)(_ + _) / sumOfWeights
-        }
-      }
+      val distTemperatures = temperatures.par.map({
+        case (l, t) => (EarthRadiusKm * Utils.greatCircleDistanceCentralAngle(location, l), t)
+      })
+      Utils.predictUsingInverseDistanceWeighting(
+        distTemperatures, DistanceThresholdKm, InverseDistanceWeighingPower)
     }
   }
 

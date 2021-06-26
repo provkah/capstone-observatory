@@ -4,7 +4,7 @@ import java.io.InputStream
 import scala.annotation.tailrec
 import scala.collection.parallel.ParIterable
 import scala.io.{BufferedSource, Source}
-import scala.math.{Pi, abs, acos, cos, sin}
+import scala.math.{Pi, abs, acos, cos, pow, sin}
 
 object Utils extends UtilsInterface {
 
@@ -62,6 +62,29 @@ object Utils extends UtilsInterface {
   }
 
   def clipRgbColor(color: Int): Int = color.min(RgbColorMax).max(RgbColorMin)
+
+  def predictUsingInverseDistanceWeighting(
+    distValues: ParIterable[(Double, Double)],
+    distanceThreshold: Double,
+    inverseDistanceWeightingPower: Int): Double = {
+
+    // closeDistValues covers the case of exact match, when distance is 0
+    val closeDistValues = distValues.filter({ case (d, _) => d <= distanceThreshold })
+    if (closeDistValues.nonEmpty) closeDistValues
+      .minBy({ case (d, _) => d }) match { case (_, v) => v }
+    else {
+      val distWeights = distValues
+        .map({ case (d, _) => d })
+        .map(1.0D / pow(_, inverseDistanceWeightingPower))
+
+      val sumOfWeights = distWeights.fold(0.0D)(_ + _)
+
+      distValues
+        .map({ case (_, t) => t })
+        .zip(distWeights).map({ case (t, w) => t * w })
+        .fold(0.0)(_ + _) / sumOfWeights
+    }
+  }
 
   def angleDegreesToRadians(angleInDegrees: Double): Double = angleInDegrees / 180.0 * Pi
 

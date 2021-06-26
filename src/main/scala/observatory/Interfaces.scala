@@ -121,6 +121,11 @@ trait UtilsInterface {
 
   def clipRgbColor(color: Int): Int
 
+  def predictUsingInverseDistanceWeighting(
+    distValues: ParIterable[(Double, Double)],
+    distanceThreshold: Double,
+    inverseDistanceWeightingPower: Int): Double
+
   def angleDegreesToRadians(angleInDegrees: Double): Double
 
   def average(values: Iterable[Double]): Double

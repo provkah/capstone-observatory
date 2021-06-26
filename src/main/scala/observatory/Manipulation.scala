@@ -1,6 +1,6 @@
 package observatory
 
-import scala.collection.{mutable}
+import scala.collection.mutable
 
 /**
   * 4th milestone: value-added information

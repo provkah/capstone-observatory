@@ -9,8 +9,14 @@ import scala.collection.parallel.ParIterable
 // or your submission will fail with a NoSuchMethodError.
 
 trait Visualization2Interface {
-  def bilinearInterpolation(point: CellPoint, d00: Temperature, d01: Temperature, d10: Temperature, d11: Temperature): Temperature
-  def visualizeGrid(grid: GridLocation => Temperature, colors: Iterable[(Temperature, Color)], tile: Tile): Image
+  def bilinearInterpolation(
+    point: CellPoint,
+    d00: Temperature, d01: Temperature, d10: Temperature, d11: Temperature): Temperature
+
+  def visualizeGrid(
+    grid: GridLocation => Temperature,
+    colors: Iterable[(Temperature, Color)],
+    tile: Tile): Image
 }
 
 trait ManipulationInterface {

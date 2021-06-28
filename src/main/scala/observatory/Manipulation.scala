@@ -65,7 +65,7 @@ object Manipulation extends ManipulationInterface {
     Console.println(s"temperatures: ${temperatures.size}")
 
     val grids = temperatures.map(makeGrid)
-    Console.println(s"grids: ${temperatures.size}")
+    Console.println(s"grids: ${grids.size}")
 
     (gridLoc: GridLocation) => {
       val yearGridLocTemperatures = grids.map(grid => grid(gridLoc))

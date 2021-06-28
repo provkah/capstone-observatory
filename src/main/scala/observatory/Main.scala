@@ -90,4 +90,8 @@ object Main extends App {
     val temperatures = for (gridLock <- gridLocs) yield gridLocTemperatureMap(gridLock)
     Console.println(s"temperatures: ${temperatures.size}")
   }
+
+  val yearsLocAvgTemperatures = yearLocAvgTemperatures.map({ case (_, locAvgTemperatures) => locAvgTemperatures })
+  var temperatureAverages = Manipulation.average(yearsLocAvgTemperatures)
+  Console.println(s"Created temperatureAverages")
 }

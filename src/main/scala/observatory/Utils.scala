@@ -76,11 +76,9 @@ object Utils extends UtilsInterface {
       val weightsValues = distValues
         .map({ case (d, v) => (1.0D / pow(d, inverseDistanceWeightingPower), v) })
 
-      val sumOfWeights = weightsValues.map({ case (w, _) => w }).fold(0.0D)(_ + _)
+      val sumOfWeights = weightsValues.aggregate(0.0)({ case (s, (w, _)) => s + w }, _ + _)
 
-      weightsValues
-        .map({ case (w, v) => w * v })
-        .fold(0.0)(_ + _) / sumOfWeights
+      weightsValues.aggregate(0.0)({ case (s, (w, v)) => s + w * v }, _ + _) / sumOfWeights
     }
   }
 

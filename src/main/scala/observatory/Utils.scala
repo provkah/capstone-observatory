@@ -73,15 +73,13 @@ object Utils extends UtilsInterface {
     if (closeDistValues.nonEmpty) closeDistValues
       .minBy({ case (d, _) => d }) match { case (_, v) => v }
     else {
-      val distWeights = distValues
-        .map({ case (d, _) => d })
-        .map(1.0D / pow(_, inverseDistanceWeightingPower))
+      val weightsValues = distValues
+        .map({ case (d, v) => (1.0D / pow(d, inverseDistanceWeightingPower), v) })
 
-      val sumOfWeights = distWeights.fold(0.0D)(_ + _)
+      val sumOfWeights = weightsValues.map({ case (w, _) => w }).fold(0.0D)(_ + _)
 
-      distValues
-        .map({ case (_, t) => t })
-        .zip(distWeights).map({ case (t, w) => t * w })
+      weightsValues
+        .map({ case (w, v) => w * v })
         .fold(0.0)(_ + _) / sumOfWeights
     }
   }

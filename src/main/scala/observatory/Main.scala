@@ -4,11 +4,9 @@ package observatory
 // import org.apache.spark.{SparkConf, SparkContext}
 // import org.apache.spark.sql.SparkSession
 
-import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.nio.ImageWriter
 
 import java.nio.file.{Files, Paths}
-import java.time.LocalDate
 
 object Main extends App {
 
@@ -38,7 +36,7 @@ object Main extends App {
     locTemperatureData: Iterable[(Location, Temperature)]): Unit = {
 
     Console.println(s"Generating image, year: $year, tile $tile")
-    val image: Image = Interaction.tile(locTemperatureData, temperatureColors, tile)
+    val image = Interaction.tile(locTemperatureData, temperatureColors, tile)
     Console.println(s"Image, year: $year, tile $tile, image $image")
 
     val imageFolderName = s"$OutputImageFolder/$year/${tile.zoom}"
@@ -51,29 +49,33 @@ object Main extends App {
     Console.println(s"Created image file: $imageFileName")
   }
 
-  val stations: Iterable[((Option[StnId], Option[WbanId]), Location)] =
-    Extraction.locateStations(s"/$StationsFile")
+  val stations = Extraction.locateStations(s"/$StationsFile")
   Console.println(s"stations size: ${stations.size}")
-  val stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap.seq
 
-  val years: Range = 2014 to 2015
-  for (year <- years) {
-    Console.println(s"Year: $year")
+  val years: Range = 2015 to 2015
 
-    val temperatureRecs: Iterable[(LocalDate, Location, Temperature)] = Extraction.locateTemperatures(
-      year, s"/$year.csv", stationLocationMap)
-    Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
+  val stationLocationMap = stations.toMap
+  val yearLocAvgTemperatures: Seq[(Year, Iterable[(Location, Temperature)])] = for {
+    year <- years
+    p1 = Console.println(s"Year: $year")
 
-    val locAvgTemps: Iterable[(Location, Temperature)] =
-      Extraction.locationYearlyAverageRecords(temperatureRecs)
-    Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemps.size}")
+    temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
+    p2 = Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
 
-    // val image: Image = Visualization.visualize(locAvgTemps, temperatureColors)
-    // Console.println(s"Created image: $image")
+    locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
+    p3 = Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
+  } yield (year, locAvgTemperatures)
+  Console.println(s"yearLocAvgTemperatures: ${yearLocAvgTemperatures.size}")
 
-    // Interaction.generateTiles(year, locAvgTemps, generateImageFile)
+  for ((year, locAvgTemperatures) <- yearLocAvgTemperatures) {
+    Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
-    val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemps)
+    /* val image: Image = Visualization.visualize(locAvgTemperatures, temperatureColors)
+    Console.println(s"Created image: $image") */
+
+    // Interaction.generateTiles(year, locAvgTemperatures, generateImageFile)
+
+    val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemperatures)
     Console.println(s"makeGrid gridLocTemperatureMap")
 
     val gridLocs: Seq[GridLocation] = for {
@@ -82,7 +84,7 @@ object Main extends App {
     } yield GridLocation(lat, lon)
     Console.println(s"gridLocs: ${gridLocs.size}")
 
-    gridLocs.foreach(gridLocTemperatureMap)
+    gridLocs.par.foreach(gridLocTemperatureMap)
     Console.println("Completed gridLocTemperatureMap")
 
     val temperatures = for (gridLock <- gridLocs) yield gridLocTemperatureMap(gridLock)

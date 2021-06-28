@@ -61,7 +61,16 @@ object Manipulation extends ManipulationInterface {
     * @return A function that, given a latitude and a longitude, returns the average temperature at this location
     */
   def average(temperatures: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature = {
-    ???
+
+    Console.println(s"temperatures: ${temperatures.size}")
+
+    val grids = temperatures.map(makeGrid)
+    Console.println(s"grids: ${temperatures.size}")
+
+    (gridLoc: GridLocation) => {
+      val yearGridLocTemperatures = grids.map(grid => grid(gridLoc))
+      Utils.average(yearGridLocTemperatures)
+    }
   }
 
   /**

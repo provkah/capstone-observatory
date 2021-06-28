@@ -78,7 +78,9 @@ object Manipulation extends ManipulationInterface {
     * @param normals A grid containing the “normal” temperatures
     * @return A grid containing the deviations compared to the normal temperatures
     */
-  def deviation(temperatures: Iterable[(Location, Temperature)], normals: GridLocation => Temperature): GridLocation => Temperature = {
+  def deviation(
+    temperatures: Iterable[(Location, Temperature)],
+    normals: GridLocation => Temperature): GridLocation => Temperature = {
 
     Console.println(s"temperatures: ${temperatures.size}")
 

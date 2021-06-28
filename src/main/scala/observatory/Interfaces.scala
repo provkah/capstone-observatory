@@ -20,7 +20,8 @@ trait ManipulationInterface {
   def average(temperatures: Iterable[Iterable[(Location, Temperature)]]): GridLocation => Temperature
 
   def deviation(
-    temperatures: Iterable[(Location, Temperature)], normals: GridLocation => Temperature): GridLocation => Temperature
+    temperatures: Iterable[(Location, Temperature)],
+    normals: GridLocation => Temperature): GridLocation => Temperature
 }
 
 trait InteractionInterface {

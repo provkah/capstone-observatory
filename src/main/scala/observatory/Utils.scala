@@ -8,6 +8,15 @@ import scala.math.{Pi, abs, acos, cos, pow, sin}
 
 object Utils extends UtilsInterface {
 
+  def bilinearInterpolation(
+    x: Double, y: Double,
+    d00: Double, d01: Double, d10: Double, d11: Double): Double = {
+
+    val oneMinusX = 1 - x
+    val oneMinusY = 1 - y
+    d00 * oneMinusX * oneMinusY + d10 * x * oneMinusY + d01 * oneMinusX * y + d11 * x * y
+  }
+
   def locationToGridLocation(l: Location): GridLocation = {
     val gridLat = Math.round(l.lat).toInt.max(GridLocLatitudeMin)
     val gridLon = Math.round(l.lon).toInt.min(GridLocLongitudeMax)

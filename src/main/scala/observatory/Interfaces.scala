@@ -115,7 +115,20 @@ trait UtilsInterface {
   val GridLocLongitudeMin = -180
   val GridLocLongitudeMax = 179
 
+  val GridLocLatRange: Seq[Int] = GridLocLatitudeMin to GridLocLatitudeMax
+  val GridLocLonRange: Seq[Int] = GridLocLongitudeMin to GridLocLongitudeMax
+
+  lazy val GridLocations: Seq[GridLocation] = for {
+    lat <- Utils.GridLocLatRange
+    lon <- Utils.GridLocLonRange
+  } yield GridLocation(lat, lon)
+
+
   type Point = (Double, Double)
+
+  def bilinearInterpolation(
+    x: Double, y: Double,
+    d00: Double, d01: Double, d10: Double, d11: Double): Double
 
   def locationToGridLocation(l: Location): GridLocation
 

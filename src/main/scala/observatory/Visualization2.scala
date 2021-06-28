@@ -1,6 +1,6 @@
 package observatory
 
-import com.sksamuel.scrimage.{Image, Pixel}
+import com.sksamuel.scrimage.{Image}
 
 /**
   * 5th milestone: value-added information visualization
@@ -18,13 +18,9 @@ object Visualization2 extends Visualization2Interface {
     */
   def bilinearInterpolation(
     point: CellPoint,
-    d00: Temperature,
-    d01: Temperature,
-    d10: Temperature,
-    d11: Temperature
-  ): Temperature = {
-    ???
-  }
+    d00: Temperature, d01: Temperature, d10: Temperature, d11: Temperature): Temperature =
+
+    Utils.bilinearInterpolation(point.x, point.y, d00, d01, d10, d11)
 
   /**
     * @param grid Grid to visualize
@@ -35,8 +31,12 @@ object Visualization2 extends Visualization2Interface {
   def visualizeGrid(
     grid: GridLocation => Temperature,
     colors: Iterable[(Temperature, Color)],
-    tile: Tile
-  ): Image = {
-    ???
+    tile: Tile): Image = {
+
+    val locTemperatures = Utils.GridLocations.par
+      .map(gridLoc => (Location(gridLoc.lat, gridLoc.lon), grid(gridLoc)))
+      .toList
+
+    Interaction.tile(locTemperatures, colors, tile)
   }
 }

@@ -82,16 +82,10 @@ object Main extends App {
     val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemperatures)
     Console.println(s"Year: $year, makeGrid gridLocTemperatureMap")
 
-    val gridLocs: Seq[GridLocation] = for {
-      lat <- Utils.GridLocLatitudeMin to Utils.GridLocLatitudeMax
-      lon <- Utils.GridLocLongitudeMin to Utils.GridLocLongitudeMax
-    } yield GridLocation(lat, lon)
-    Console.println(s"Year: $year, gridLocs: ${gridLocs.size}")
-
-    gridLocs.par.foreach(gridLocTemperatureMap)
+    Utils.GridLocations.par.foreach(gridLocTemperatureMap)
     Console.println(s"Year: $year, Completed gridLocTemperatureMap")
 
-    val temperatures = for (gridLock <- gridLocs) yield gridLocTemperatureMap(gridLock)
+    val temperatures = for (gridLock <- Utils.GridLocations.par) yield gridLocTemperatureMap(gridLock)
     Console.println(s"Year: $year, temperatures: ${temperatures.size}")
 
     val deviations = Manipulation.deviation(locAvgTemperatures, temperatureAverages)

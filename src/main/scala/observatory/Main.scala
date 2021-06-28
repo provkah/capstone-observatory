@@ -67,6 +67,10 @@ object Main extends App {
   } yield (year, locAvgTemperatures)
   Console.println(s"yearLocAvgTemperatures: ${yearLocAvgTemperatures.size}")
 
+  val yearsLocAvgTemperatures = yearLocAvgTemperatures.map({ case (_, locAvgTemperatures) => locAvgTemperatures })
+  var temperatureAverages = Manipulation.average(yearsLocAvgTemperatures)
+  Console.println(s"Created temperatureAverages grid")
+
   for ((year, locAvgTemperatures) <- yearLocAvgTemperatures) {
     Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
@@ -76,22 +80,21 @@ object Main extends App {
     // Interaction.generateTiles(year, locAvgTemperatures, generateImageFile)
 
     val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemperatures)
-    Console.println(s"makeGrid gridLocTemperatureMap")
+    Console.println(s"Year: $year, makeGrid gridLocTemperatureMap")
 
     val gridLocs: Seq[GridLocation] = for {
       lat <- Utils.GridLocLatitudeMin to Utils.GridLocLatitudeMax
       lon <- Utils.GridLocLongitudeMin to Utils.GridLocLongitudeMax
     } yield GridLocation(lat, lon)
-    Console.println(s"gridLocs: ${gridLocs.size}")
+    Console.println(s"Year: $year, gridLocs: ${gridLocs.size}")
 
     gridLocs.par.foreach(gridLocTemperatureMap)
-    Console.println("Completed gridLocTemperatureMap")
+    Console.println(s"Year: $year, Completed gridLocTemperatureMap")
 
     val temperatures = for (gridLock <- gridLocs) yield gridLocTemperatureMap(gridLock)
-    Console.println(s"temperatures: ${temperatures.size}")
-  }
+    Console.println(s"Year: $year, temperatures: ${temperatures.size}")
 
-  val yearsLocAvgTemperatures = yearLocAvgTemperatures.map({ case (_, locAvgTemperatures) => locAvgTemperatures })
-  var temperatureAverages = Manipulation.average(yearsLocAvgTemperatures)
-  Console.println(s"Created temperatureAverages")
+    val deviations = Manipulation.deviation(locAvgTemperatures, temperatureAverages)
+    Console.println(s"Year: $year, created deviations grid")
+  }
 }

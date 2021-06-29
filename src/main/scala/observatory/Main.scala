@@ -25,6 +25,7 @@ object Main extends App {
   val stations = Extraction.locateStations(s"/$StationsFile")
   Console.println(s"stations size: ${stations.size}")
 
+  // 1975 to 1990
   val yearsForNormals: Range = 1975 to 1990
   val stationLocationMap = stations.toMap
   val yearLocAvgTemperatures: Seq[(Year, Iterable[(Location, Temperature)])] = for {
@@ -64,8 +65,9 @@ object Main extends App {
     Console.println(s"Year: $year, created temperatureDeviationGrid")
   }*/
 
-  val years: Range = 1991 to 2015
-  for (year <- years) {
+  // 1991 to 2015
+  val yearsForTemperatureDeviations: Range = 1991 to 2015
+  for (year <- yearsForTemperatureDeviations) {
     Console.println(s"Year: $year")
 
     val temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)

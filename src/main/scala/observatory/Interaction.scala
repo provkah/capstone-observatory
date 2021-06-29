@@ -1,8 +1,7 @@
 package observatory
 
-import com.sksamuel.scrimage.{Image, Pixel}
+import com.sksamuel.scrimage.Image
 
-import scala.collection.parallel.{ParIterable, ParSeq}
 import scala.math.{Pi, atan, pow, sinh}
 
 /**
@@ -10,8 +9,8 @@ import scala.math.{Pi, atan, pow, sinh}
   */
 object Interaction extends InteractionInterface {
 
-  val TileWidth = 256
-  val TileHeight = 256
+  val GenTileSize = 128
+  val TileSize = 256
 
   // number of subtiles in both axis: 2 ** 8 == 256
   val TileRelativeZoom = 8
@@ -23,7 +22,8 @@ object Interaction extends InteractionInterface {
 
   /**
     * @param tile Tile coordinates
-    * @return The latitude and longitude of the top-left corner of the tile, as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+    * @return The latitude and longitude of the top-left corner of the tile,
+    *         as per http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
     */
   def tileLocation(tile: Tile): Location = {
 
@@ -49,23 +49,26 @@ object Interaction extends InteractionInterface {
 
     val xStart = tile.x * TileCoordFactor
     val yStart = tile.y * TileCoordFactor
-    val tileCoords: Seq[(Int, Int)] = for {
-      y <- yStart until yStart + TileHeight
-      x <- xStart until xStart + TileWidth
+    val tileCoords = for {
+      y <- yStart until yStart + GenTileSize
+      x <- xStart until xStart + GenTileSize
     } yield (x, y)
 
-    val pixelLocations: ParSeq[Location] = tileCoords.par
-      .map({ case (x, y) => tileLocation(Tile(x, y, tileZoom)) })
+    val pixelLocations = tileCoords.par.map({ case (x, y) => tileLocation(Tile(x, y, tileZoom)) })
 
     Console.println(s"Constructing pixels, tile $tile")
     val alpha = (TileRgbaAlpha * 256 - 1).toInt
-    val pixels: ParIterable[Pixel] = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
+    val pixels = Visualization.locationsToPixels(pixelLocations, alpha, temperatures, colors)
     Console.println(s"Done constructing pixels, tile $tile, pixels: ${pixels.size}")
 
     Console.println(s"Generating image, tile $tile")
-    val image = Image(TileWidth, TileHeight, pixels.toArray)
+    val image = Image(GenTileSize, GenTileSize, pixels.toArray)
     Console.println(s"Done generating image, tile $tile, image $image")
-    image
+
+    val scaledImage = image.scale(TileSize / GenTileSize)
+    Console.println(s"Scaled image, tile $tile, scaledImage $scaledImage")
+
+    scaledImage
   }
 
   /**
@@ -79,8 +82,7 @@ object Interaction extends InteractionInterface {
     yearlyData: Iterable[(Year, Data)],
     generateImage: (Year, Tile, Data) => Unit): Unit = {
 
-    yearlyData.par
-      .foreach({ case (year, yearData) => generateTiles(year, yearData, generateImage) })
+    yearlyData.par.foreach({ case (year, yearData) => generateTiles(year, yearData, generateImage) })
   }
 
   def generateTiles[Data](
@@ -95,7 +97,7 @@ object Interaction extends InteractionInterface {
     generateImage: (Year, Tile, Data) => Unit): Unit = {
 
     val numTiles = pow(2, zoom).toInt
-    val tiles: Seq[Tile] = for {
+    val tiles = for {
       xTile <- 0 until numTiles
       yTile <- 0 until numTiles
     } yield Tile(xTile, yTile, zoom)

@@ -1,6 +1,6 @@
 package observatory
 
-import com.sksamuel.scrimage.{Image}
+import com.sksamuel.scrimage.Image
 
 /**
   * 5th milestone: value-added information visualization
@@ -33,8 +33,8 @@ object Visualization2 extends Visualization2Interface {
     colors: Iterable[(Temperature, Color)],
     tile: Tile): Image = {
 
-    val locTemperatures = Utils.GridLocations.par
-      .map(gridLoc => (Location(gridLoc.lat, gridLoc.lon), grid(gridLoc)))
+    val locTemperatures = Utils.LocationsForGrid.par
+      .zip(Utils.GridLocations.par.map(l => grid(l)))
       .toList
 
     Interaction.tile(locTemperatures, colors, tile)

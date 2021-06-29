@@ -102,6 +102,15 @@ trait ExtractionUtilsInterface {
   def lineToStationRec(line: String): ((Option[StnId], Option[WbanId]), Location)
 }
 
+trait OutputUtilsInterface {
+  val OutputImageFolder = "target/temperatures"
+
+  val temperatureColors: Iterable[(Temperature, Color)] =
+    for (c <- 0 to 255) yield (c - 128.0, Color(c, 255 - c, c))
+
+  def generateImageFile(year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
+}
+
 trait UtilsInterface {
 
   val RgbColorMin = 0
@@ -123,6 +132,7 @@ trait UtilsInterface {
     lon <- Utils.GridLocLonRange
   } yield GridLocation(lat, lon)
 
+  lazy val LocationsForGrid: Seq[Location] = GridLocations.map(l => Location(l.lat, l.lon))
 
   type Point = (Double, Double)
 

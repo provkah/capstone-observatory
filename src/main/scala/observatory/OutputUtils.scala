@@ -8,6 +8,7 @@ object OutputUtils extends OutputUtilsInterface {
 
   def generateImageFile(
     year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)],
+    temperatureColors: Iterable[(Temperature, Color)],
     outputFolder: String): Unit = {
 
     Console.println(s"Generating image, year: $year, tile $tile")
@@ -27,10 +28,16 @@ object OutputUtils extends OutputUtilsInterface {
   def generateTemperatureImageFile(
     year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit =
 
-    generateImageFile(year, tile, locTemperatures, TemperatureImageOutputFolder)
+    generateImageFile(
+      year, tile, locTemperatures,
+      temperatureColors,
+      TemperatureImageOutputFolder)
 
   def generateTemperatureDeviationImageFile(
      year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit =
 
-    generateImageFile(year, tile, locTemperatures, TemperatureDeviationImageOutputFolder)
+    generateImageFile(
+      year, tile, locTemperatures,
+      temperatureDeviationColors,
+      TemperatureDeviationImageOutputFolder)
 }

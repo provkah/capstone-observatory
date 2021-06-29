@@ -106,11 +106,17 @@ trait OutputUtilsInterface {
   val TemperatureImageOutputFolder = "target/temperatures"
   val TemperatureDeviationImageOutputFolder = "target/deviations"
 
+  // test-only
   val temperatureColors: Iterable[(Temperature, Color)] =
     for (c <- 0 to 255) yield (c - 128.0, Color(c, 255 - c, c))
 
+  val temperatureDeviationColors: Iterable[(Temperature, Color)] = List(
+    (7, Color(0, 0, 0)), (4, Color(255, 0, 0)), (2, Color(255, 255, 0)),
+    (0, Color(255, 255, 255)), (-2, Color(0, 255, 255)), (-7, Color(0, 0, 255)))
+
   def generateImageFile(
     year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)],
+    temperatureColors: Iterable[(Temperature, Color)],
     outputFolder: String): Unit
 
   def generateTemperatureImageFile(

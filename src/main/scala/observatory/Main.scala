@@ -49,7 +49,7 @@ object Main extends App {
     // val image: Image = Visualization.visualize(locAvgTemperatures, temperatureColors)
     // Console.println(s"Created image: $image")
 
-    // Interaction.generateTiles(year, locAvgTemperatures, OutputUtils.generateImageFile)
+    // Interaction.generateTiles(year, locAvgTemperatures, OutputUtils.generateTemperatureImageFile)
 
     val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemperatures)
     Console.println(s"Year: $year, makeGrid gridLocTemperatureMap")
@@ -82,6 +82,6 @@ object Main extends App {
       .toList
     Console.println(s"Year: $year, temperatureDeviations: ${temperatureDeviations.size}")
 
-    Interaction.generateTiles(year, temperatureDeviations, OutputUtils.generateImageFile)
+    Interaction.generateTiles(year, temperatureDeviations, OutputUtils.generateTemperatureDeviationImageFile)
   }
 }

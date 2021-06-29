@@ -103,12 +103,21 @@ trait ExtractionUtilsInterface {
 }
 
 trait OutputUtilsInterface {
-  val OutputImageFolder = "target/temperatures"
+  val TemperatureImageOutputFolder = "target/temperatures"
+  val TemperatureDeviationImageOutputFolder = "target/deviations"
 
   val temperatureColors: Iterable[(Temperature, Color)] =
     for (c <- 0 to 255) yield (c - 128.0, Color(c, 255 - c, c))
 
-  def generateImageFile(year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
+  def generateImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)],
+    outputFolder: String): Unit
+
+  def generateTemperatureImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
+
+  def generateTemperatureDeviationImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
 }
 
 trait UtilsInterface {

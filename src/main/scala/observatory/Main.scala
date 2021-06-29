@@ -22,67 +22,79 @@ object Main extends App {
   /*val conf: SparkConf = new SparkConf().setMaster("local").setAppName("Observatory")
   val sc: SparkContext = new SparkContext(conf)*/
 
+  private def yearLocationAvgTemperatures(
+    years: Iterable[Year],
+    stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(Year, Iterable[(Location, Temperature)])] =
+
+    for {
+      year <- years
+      p1 = Console.println(s"Year: $year")
+
+      temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
+      p2 = Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
+
+      locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
+      p3 = Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
+    } yield (year, locAvgTemperatures)
+
   val stations = Extraction.locateStations(s"/$StationsFile")
   Console.println(s"stations size: ${stations.size}")
 
+  val stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
+
   // 1975 to 1990
-  val yearsForNormals: Range = 1975 to 1990
-  val stationLocationMap = stations.toMap
-  val yearLocAvgTemperatures: Seq[(Year, Iterable[(Location, Temperature)])] = for {
-    year <- yearsForNormals
-    p1 = Console.println(s"Year: $year")
+  val yearsForNormals = 1975 to 1975
+  Console.println(s"yearsForNormals: $yearsForNormals")
+  // 1991 to 2015
+  val yearsForTemperatureDeviations = 1991 to 1991
+  Console.println(s"yearsForTemperatureDeviations: $yearsForTemperatureDeviations")
 
-    temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
-    p2 = Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
+  val allYears = yearsForNormals ++ yearsForTemperatureDeviations
+  Console.println(s"allYears: $allYears")
 
-    locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
-    p3 = Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
-  } yield (year, locAvgTemperatures)
-  Console.println(s"From ${yearsForNormals.start} to ${yearsForNormals.end}, yearLocAvgTemperatures: ${yearLocAvgTemperatures.size}")
+  val allYearLocationAvgTemperatures = yearLocationAvgTemperatures(allYears, stationLocationMap)
+  Console.println(s"allYearLocationAvgTemperatures: ${allYearLocationAvgTemperatures.size}")
 
-  val yearsLocAvgTemperatures = yearLocAvgTemperatures.map({ case (_, locAvgTemperatures) => locAvgTemperatures })
-  var temperatureAverages = Manipulation.average(yearsLocAvgTemperatures)
-  Console.println(s"From ${yearsForNormals.start} to ${yearsForNormals.end}, created temperatureAverages grid")
+  for ((year, locAvgTemperatures) <- allYearLocationAvgTemperatures) {
+    Console.println(s"Deviations, year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
-  /*for ((year, locAvgTemperatures) <- yearLocAvgTemperatures) {
-    Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
-
-    // val image: Image = Visualization.visualize(locAvgTemperatures, temperatureColors)
+    // val image = Visualization.visualize(locAvgTemperatures, OutputUtils.temperatureColors)
     // Console.println(s"Created image: $image")
 
-    // Interaction.generateTiles(year, locAvgTemperatures, OutputUtils.generateTemperatureImageFile)
+    Interaction.generateTiles(year, locAvgTemperatures, OutputUtils.generateTemperatureImageFile)
 
-    val gridLocTemperatureMap: GridLocation => Temperature = Manipulation.makeGrid(locAvgTemperatures)
-    Console.println(s"Year: $year, makeGrid gridLocTemperatureMap")
+    val gridLocTemperatureGrid = Manipulation.makeGrid(locAvgTemperatures)
+    Console.println(s"Year: $year, created gridLocTemperatureGrid")
 
-    Utils.GridLocations.par.foreach(gridLocTemperatureMap)
-    Console.println(s"Year: $year, Completed gridLocTemperatureMap")
+    Utils.GridLocations.par.foreach(gridLocTemperatureGrid)
+    Console.println(s"Year: $year, Completed gridLocTemperatureGrid")
 
-    val temperaturesInGridLocs = Utils.GridLocations.par.map(gridLocTemperatureMap)
-    Console.println(s"Year: $year, temperaturesInGridLocs: ${temperaturesInGridLocs.size}")
+    val temperaturesInAllGridLocs = Utils.GridLocations.par.map(gridLocTemperatureGrid)
+    Console.println(s"Year: $year, temperaturesInAllGridLocs: ${temperaturesInAllGridLocs.size}")
+  }
 
-    val temperatureDeviationGrid = Manipulation.deviation(locAvgTemperatures, temperatureAverages)
-    Console.println(s"Year: $year, created temperatureDeviationGrid")
-  }*/
+  val yearLocAvgTemperaturesForNormals = allYearLocationAvgTemperatures
+    .filter({ case (year, _) => yearsForNormals.contains(year) })
+  Console.println(s"yearsForNormals: $yearsForNormals, yearLocAvgTemperaturesForNormals: ${yearLocAvgTemperaturesForNormals.size}")
 
-  // 1991 to 2015
-  val yearsForTemperatureDeviations: Range = 1991 to 2015
-  for (year <- yearsForTemperatureDeviations) {
-    Console.println(s"Year: $year")
+  val yearsLocAvgTemperaturesForNormals = yearLocAvgTemperaturesForNormals
+    .map({ case (_, locAvgTemperatures) => locAvgTemperatures })
+  var avgTemperatureNormalsGrid = Manipulation.average(yearsLocAvgTemperaturesForNormals)
+  Console.println(s"yearsForNormals: $yearsForNormals, created avgTemperatureNormalsGrid")
 
-    val temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
-    Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
+  val yearLocAvgTemperaturesDeviations = allYearLocationAvgTemperatures
+    .filter({ case (year, _) => yearsForTemperatureDeviations.contains(year) })
+  Console.println(s"yearsForTemperatureDeviations: $yearsForTemperatureDeviations, yearLocAvgTemperaturesDeviations: ${yearLocAvgTemperaturesDeviations.size}")
+  for ((year, locAvgTemperatures) <- yearLocAvgTemperaturesDeviations) {
+    Console.println(s"Deviations, year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
-    val locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
-    Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
-
-    val temperatureDeviationGrid = Manipulation.deviation(locAvgTemperatures, temperatureAverages)
-    Console.println(s"Year: $year, created temperatureDeviationGrid")
+    val temperatureDeviationGrid = Manipulation.deviation(locAvgTemperatures, avgTemperatureNormalsGrid)
+    Console.println(s"Deviations, year: $year, created temperatureDeviationGrid")
 
     val temperatureDeviations = Utils.LocationsForGrid.par
       .zip(Utils.GridLocations.par.map(l => temperatureDeviationGrid(l)))
       .toList
-    Console.println(s"Year: $year, temperatureDeviations: ${temperatureDeviations.size}")
+    Console.println(s"Deviations, year: $year, temperatureDeviations: ${temperatureDeviations.size}")
 
     Interaction.generateTiles(year, temperatureDeviations, OutputUtils.generateTemperatureDeviationImageFile)
   }

@@ -18,6 +18,14 @@ object Main extends App {
   /*val conf: SparkConf = new SparkConf().setMaster("local").setAppName("Observatory")
   val sc: SparkContext = new SparkContext(conf)*/
 
+  // 1975 to 1990
+  val YearsForNormals = 1975 to 1990
+  Console.println(s"yearsForNormals: $YearsForNormals")
+
+  // 1991 to 2015
+  val YearsForTemperatureDeviations = 1991 to 2015
+  Console.println(s"yearsForTemperatureDeviations: $YearsForTemperatureDeviations")
+
   private def yearLocationAvgTemperatures(
     years: Iterable[Year],
     stationLocationMap: Map[StationId, Location]): Iterable[(Year, Iterable[(Location, Temperature)])] = {
@@ -36,19 +44,10 @@ object Main extends App {
   val stations = Extraction.locateStations(s"/$StationsFile")
   Console.println(s"stations size: ${stations.size}")
 
-  val stationLocationMap: Map[StationId, Location] = stations.toMap
-
-  // 1975 to 1990
-  val yearsForNormals = 1975 to 1990
-  Console.println(s"yearsForNormals: $yearsForNormals")
-  // 1991 to 2015
-  val yearsForTemperatureDeviations = 1991 to 2015
-  Console.println(s"yearsForTemperatureDeviations: $yearsForTemperatureDeviations")
-
-  val allYears = yearsForNormals ++ yearsForTemperatureDeviations
+  val allYears = YearsForNormals ++ YearsForTemperatureDeviations
   Console.println(s"allYears: $allYears")
 
-  val allYearLocationAvgTemperatures = yearLocationAvgTemperatures(allYears, stationLocationMap)
+  val allYearLocationAvgTemperatures = yearLocationAvgTemperatures(allYears, stations.toMap)
   Console.println(s"allYearLocationAvgTemperatures: ${allYearLocationAvgTemperatures.size}")
 
   for ((year, locAvgTemperatures) <- allYearLocationAvgTemperatures.par) {
@@ -57,7 +56,7 @@ object Main extends App {
     // val image = Visualization.visualize(locAvgTemperatures, OutputUtils.temperatureColors)
     // Console.println(s"Created image: $image")
 
-    Interaction.generateTiles(year, locAvgTemperatures, OutputUtils.generateTemperatureImageFile)
+    Interaction.generateTiles(year, locAvgTemperatures, Interaction.generateTemperatureImageFile)
 
     val gridLocTemperatureGrid = Manipulation.makeGrid(locAvgTemperatures)
     Console.println(s"Year: $year, created gridLocTemperatureGrid")
@@ -70,17 +69,17 @@ object Main extends App {
   }
 
   val yearLocAvgTemperaturesForNormals = allYearLocationAvgTemperatures
-    .filter({ case (year, _) => yearsForNormals.contains(year) })
-  Console.println(s"yearsForNormals: $yearsForNormals, yearLocAvgTemperaturesForNormals: ${yearLocAvgTemperaturesForNormals.size}")
+    .filter({ case (year, _) => YearsForNormals.contains(year) })
+  Console.println(s"yearsForNormals: $YearsForNormals, yearLocAvgTemperaturesForNormals: ${yearLocAvgTemperaturesForNormals.size}")
 
   val yearsLocAvgTemperaturesForNormals = yearLocAvgTemperaturesForNormals
     .map({ case (_, locAvgTemperatures) => locAvgTemperatures })
   var avgTemperatureNormalsGrid = Manipulation.average(yearsLocAvgTemperaturesForNormals)
-  Console.println(s"yearsForNormals: $yearsForNormals, created avgTemperatureNormalsGrid")
+  Console.println(s"yearsForNormals: $YearsForNormals, created avgTemperatureNormalsGrid")
 
   val yearLocAvgTemperaturesDeviations = allYearLocationAvgTemperatures
-    .filter({ case (year, _) => yearsForTemperatureDeviations.contains(year) })
-  Console.println(s"yearsForTemperatureDeviations: $yearsForTemperatureDeviations, yearLocAvgTemperaturesDeviations: ${yearLocAvgTemperaturesDeviations.size}")
+    .filter({ case (year, _) => YearsForTemperatureDeviations.contains(year) })
+  Console.println(s"yearsForTemperatureDeviations: $YearsForTemperatureDeviations, yearLocAvgTemperaturesDeviations: ${yearLocAvgTemperaturesDeviations.size}")
   for ((year, locAvgTemperatures) <- yearLocAvgTemperaturesDeviations.par) {
     Console.println(s"Deviations, year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
@@ -92,6 +91,6 @@ object Main extends App {
       .toList
     Console.println(s"Deviations, year: $year, temperatureDeviations: ${temperatureDeviations.size}")
 
-    Interaction.generateTiles(year, temperatureDeviations, OutputUtils.generateTemperatureDeviationImageFile)
+    Interaction.generateTiles(year, temperatureDeviations, Interaction.generateTemperatureDeviationImageFile)
   }
 }

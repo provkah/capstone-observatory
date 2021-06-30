@@ -50,6 +50,12 @@ trait InteractionInterface {
   def generateTiles[Data](
     year: Int, data: Data, zoom: Int,
     generateImage: (Year, Tile, Data) => Unit): Unit
+
+  def generateTemperatureImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
+
+  def generateTemperatureDeviationImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
 }
 
 trait VisualizationInterface {
@@ -102,31 +108,6 @@ trait ExtractionUtilsInterface {
   def lineToTemperatureRec(line: String): (StationId, (Month, Day), Temperature)
 
   def lineToStationRec(line: String): (StationId, Location)
-}
-
-trait OutputUtilsInterface {
-  val TemperatureImageOutputFolder = "target/temperatures"
-  val TemperatureDeviationImageOutputFolder = "target/deviations"
-
-  val temperatureColors: Iterable[(Temperature, Color)] = List(
-    (60, Color(255, 255, 255)), (32, Color(255, 0, 0)), (12, Color(255, 0, 0)), (0, Color(0, 255, 255)),
-    (-15, Color(0, 0, 255)), (-27, Color(255, 0, 0)), (-50, Color(33, 0, 107)), (60, Color(0, 0, 0))
-  )
-
-  val temperatureDeviationColors: Iterable[(Temperature, Color)] = List(
-    (7, Color(0, 0, 0)), (4, Color(255, 0, 0)), (2, Color(255, 255, 0)),
-    (0, Color(255, 255, 255)), (-2, Color(0, 255, 255)), (-7, Color(0, 0, 255)))
-
-  def generateImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)],
-    temperatureColors: Iterable[(Temperature, Color)],
-    outputFolder: String): Unit
-
-  def generateTemperatureImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
-
-  def generateTemperatureDeviationImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
 }
 
 trait UtilsInterface {

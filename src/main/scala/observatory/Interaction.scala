@@ -1,7 +1,9 @@
 package observatory
 
 import com.sksamuel.scrimage.Image
+import com.sksamuel.scrimage.nio.ImageWriter
 
+import java.nio.file.{Files, Paths}
 import scala.math.{Pi, atan, pow, sinh}
 
 /**
@@ -19,6 +21,19 @@ object Interaction extends InteractionInterface {
   val TileRgbaAlpha = 0.5
 
   val ZoomLevels: Range.Inclusive = 0 to 3
+
+  val TemperatureColors = List(
+    (60.0, Color(255, 255, 255)), (32.0, Color(255, 0, 0)), (12.0, Color(255, 0, 0)), (0.0, Color(0, 255, 255)),
+    (-15.0, Color(0, 0, 255)), (-27.0, Color(255, 0, 0)), (-50.0, Color(33, 0, 107)), (60.0, Color(0, 0, 0))
+  )
+
+  val TemperatureDeviationColors = List(
+    (7.0, Color(0, 0, 0)), (4.0, Color(255, 0, 0)), (2.0, Color(255, 255, 0)),
+    (0.0, Color(255, 255, 255)), (-2.0, Color(0, 255, 255)), (-7.0, Color(0, 0, 255)))
+
+  val TemperatureImageOutputFolder = "target/temperatures"
+  val TemperatureDeviationImageOutputFolder = "target/deviations"
+
 
   /**
     * @param tile Tile coordinates
@@ -104,4 +119,39 @@ object Interaction extends InteractionInterface {
 
     tiles.par.foreach(generateImage(year, _, data))
   }
+
+  private def generateImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)],
+    temperatureColors: Iterable[(Temperature, Color)],
+    outputFolder: String): Unit = {
+
+    Console.println(s"Generating image, year: $year, tile $tile")
+    val image = Interaction.tile(locTemperatures, temperatureColors, tile)
+    Console.println(s"Image, year: $year, tile $tile, image $image")
+
+    val imageFolderName = s"$outputFolder/$year/${tile.zoom}"
+    val folderPath = Paths.get(imageFolderName)
+    Files.createDirectories(folderPath)
+    Console.println(s"created, if did not exist, folder: $folderPath")
+
+    val imageFileName = s"$imageFolderName/${tile.x}-${tile.y}.png"
+    image.output(imageFileName)(ImageWriter.default)
+    Console.println(s"Created image file: $imageFileName")
+  }
+
+  def generateTemperatureImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit =
+
+    generateImageFile(
+      year, tile, locTemperatures,
+      TemperatureColors,
+      TemperatureImageOutputFolder)
+
+  def generateTemperatureDeviationImageFile(
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit =
+
+    generateImageFile(
+      year, tile, locTemperatures,
+      TemperatureDeviationColors,
+      TemperatureDeviationImageOutputFolder)
 }

@@ -81,7 +81,7 @@ object Main extends App {
   val yearLocAvgTemperaturesDeviations = allYearLocationAvgTemperatures
     .filter({ case (year, _) => yearsForTemperatureDeviations.contains(year) })
   Console.println(s"yearsForTemperatureDeviations: $yearsForTemperatureDeviations, yearLocAvgTemperaturesDeviations: ${yearLocAvgTemperaturesDeviations.size}")
-  for ((year, locAvgTemperatures) <- yearLocAvgTemperaturesDeviations) {
+  for ((year, locAvgTemperatures) <- yearLocAvgTemperaturesDeviations.par) {
     Console.println(s"Deviations, year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
     val temperatureDeviationGrid = Manipulation.deviation(locAvgTemperatures, avgTemperatureNormalsGrid)

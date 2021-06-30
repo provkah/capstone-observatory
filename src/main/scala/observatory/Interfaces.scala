@@ -97,6 +97,8 @@ trait ExtractionUtilsInterface {
 
   val NoTempStr = "9999.9"
 
+  def getLinesIteratorFromResFile(resFile: String, classObj: Class[_]): Iterator[String]
+
   def lineToTemperatureRec(line: String): (StationId, (Month, Day), Temperature)
 
   def lineToStationRec(line: String): (StationId, Location)
@@ -179,6 +181,4 @@ trait UtilsInterface {
   def average(values: ParIterable[Double]): Double
 
   def tempFahrenheitToCelcius(degreesFahrenheit: Double): Double
-
-  def getLinesIteratorFromResFile(resFile: String, classObj: Class[_]): Iterator[String]
 }

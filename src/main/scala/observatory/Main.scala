@@ -31,6 +31,7 @@ object Main extends App {
       Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
       (year, temperatureRecs)
     })
+
     yearTemperatureRecs.map({ case (year, temperatureRecs) =>
       val locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
       Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
@@ -44,10 +45,10 @@ object Main extends App {
   val stationLocationMap: Map[StationId, Location] = stations.toMap
 
   // 1975 to 1990
-  val yearsForNormals = 1975 to 1975
+  val yearsForNormals = 1975 to 1990
   Console.println(s"yearsForNormals: $yearsForNormals")
   // 1991 to 2015
-  val yearsForTemperatureDeviations = 1991 to 1991
+  val yearsForTemperatureDeviations = 1991 to 2015
   Console.println(s"yearsForTemperatureDeviations: $yearsForTemperatureDeviations")
 
   val allYears = yearsForNormals ++ yearsForTemperatureDeviations

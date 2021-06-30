@@ -10,8 +10,8 @@ object Extraction extends ExtractionInterface {
 
   def locateStations(stationsFile: String): Iterable[(StationId, Location)] = {
 
-    val lines = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
-    lines.par
+    val lines = ExtractionUtils.getLinesIteratorFromResFile(stationsFile, getClass)
+    lines.toList.par
       .map(ExtractionUtils.lineToStationRec)
       .filter({ case (_, loc) => loc.isValid })
       .toList
@@ -26,16 +26,16 @@ object Extraction extends ExtractionInterface {
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)] = {
 
-    val stationLocationMap = locateStations(stationsFile).toMap
-    locateTemperatures(year, temperaturesFile, stationLocationMap)
+    val stationLocations = locateStations(stationsFile)
+    locateTemperatures(year, temperaturesFile, stationLocations.toMap)
   }
 
   def locateTemperatures(
     year: Year, temperaturesFile: String,
     stationLocationMap: Map[StationId, Location]): Iterable[(LocalDate, Location, Temperature)] = {
 
-    val lines = Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList
-    val temperatureRecs = lines.par
+    val lines = ExtractionUtils.getLinesIteratorFromResFile(temperaturesFile, getClass)
+    val temperatureRecs = lines.toList.par
       .map(ExtractionUtils.lineToTemperatureRec)
 
     temperatureRecs.map({ case ((stnId, wbanId), (month, day), temp) =>

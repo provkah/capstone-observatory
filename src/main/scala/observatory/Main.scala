@@ -22,7 +22,7 @@ object Main extends App {
     years: Iterable[Year],
     stationLocationMap: Map[StationId, Location]): Iterable[(Year, Iterable[(Location, Temperature)])] = {
 
-    years.map(year => {
+    years.par.map(year => {
       val temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
       Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
 
@@ -30,7 +30,7 @@ object Main extends App {
       Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
       (year, locAvgTemperatures)
-    })
+    }).toList
   }
 
   val stations = Extraction.locateStations(s"/$StationsFile")

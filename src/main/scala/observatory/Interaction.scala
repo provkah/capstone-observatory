@@ -107,7 +107,7 @@ object Interaction extends InteractionInterface {
     ZoomLevels.par.foreach(generateTiles(year, data, _, generateImage))
   }
 
-  def generateTiles[Data](
+  private def generateTiles[Data](
     year: Int, data: Data, zoom: Int,
     generateImage: (Year, Tile, Data) => Unit): Unit = {
 

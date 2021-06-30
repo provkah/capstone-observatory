@@ -47,10 +47,6 @@ trait InteractionInterface {
     year: Int, data: Data,
     generateImage: (Year, Tile, Data) => Unit): Unit
 
-  def generateTiles[Data](
-    year: Int, data: Data, zoom: Int,
-    generateImage: (Year, Tile, Data) => Unit): Unit
-
   def generateTemperatureImageFile(
     year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
 

@@ -5,11 +5,33 @@ package observatory
   */
 object Interaction2 extends Interaction2Interface {
 
+  // Have to duplicate the following objects due to the project structure:
+  // The Interaction2.scala is also part of the capstone-ui project, not depending an any other artifacts
+  // of the main project
+
+  // 1975 to 1990
+  val YearsForNormals = 1975 to 1990
+
+  // 1991 to 2015
+  val YearsForTemperatureDeviations = 1991 to 2015
+
+  val TemperatureColors = List(
+    (60.0, Color(255, 255, 255)), (32.0, Color(255, 0, 0)), (12.0, Color(255, 0, 0)), (0.0, Color(0, 255, 255)),
+    (-15.0, Color(0, 0, 255)), (-27.0, Color(255, 0, 0)), (-50.0, Color(33, 0, 107)), (60.0, Color(0, 0, 0))
+  )
+
+  val TemperatureDeviationColors = List(
+    (7.0, Color(0, 0, 0)), (4.0, Color(255, 0, 0)), (2.0, Color(255, 255, 0)),
+    (0.0, Color(255, 255, 255)), (-2.0, Color(0, 255, 255)), (-7.0, Color(0, 0, 255)))
+
   /**
     * @return The available layers of the application
     */
   def availableLayers: Seq[Layer] = {
-    ???
+    Seq[Layer](
+      Layer(LayerName.Temperatures, TemperatureColors, YearsForNormals),
+      Layer(LayerName.Deviations, TemperatureDeviationColors, YearsForTemperatureDeviations)
+    )
   }
 
   /**
@@ -17,7 +39,8 @@ object Interaction2 extends Interaction2Interface {
     * @return A signal containing the year bounds corresponding to the selected layer
     */
   def yearBounds(selectedLayer: Signal[Layer]): Signal[Range] = {
-    ???
+
+    Signal(selectedLayer().bounds)
   }
 
   /**
@@ -29,7 +52,9 @@ object Interaction2 extends Interaction2Interface {
     *         in the `selectedLayer` bounds.
     */
   def yearSelection(selectedLayer: Signal[Layer], sliderValue: Signal[Year]): Signal[Year] = {
-    ???
+
+    val bounds = Signal(selectedLayer().bounds)
+    Signal(sliderValue().max(bounds().min).min(bounds().max))
   }
 
   /**
@@ -38,7 +63,8 @@ object Interaction2 extends Interaction2Interface {
     * @return The URL pattern to retrieve tiles
     */
   def layerUrlPattern(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    ???
+
+    Signal(s"target/${selectedLayer().layerName.id}/${selectedYear()}/{x}/{y}{r}.png")
   }
 
   /**
@@ -47,9 +73,9 @@ object Interaction2 extends Interaction2Interface {
     * @return The caption to show
     */
   def caption(selectedLayer: Signal[Layer], selectedYear: Signal[Year]): Signal[String] = {
-    ???
-  }
 
+    Signal(s"${selectedLayer().layerName.id.capitalize} (${selectedYear()})")
+  }
 }
 
 // Interface used by the grading infrastructure. Do not change signatures

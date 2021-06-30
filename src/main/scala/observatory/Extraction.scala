@@ -8,7 +8,7 @@ object Extraction extends ExtractionInterface {
     * 1st milestone: data extraction
     */
 
-  def locateStations(stationsFile: String): Iterable[((Option[StnId], Option[WbanId]), Location)] = {
+  def locateStations(stationsFile: String): Iterable[(StationId, Location)] = {
 
     val lines = Utils.getLinesIteratorFromResFile(stationsFile, getClass).toList
     lines.par
@@ -32,7 +32,7 @@ object Extraction extends ExtractionInterface {
 
   def locateTemperatures(
     year: Year, temperaturesFile: String,
-    stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(LocalDate, Location, Temperature)] = {
+    stationLocationMap: Map[StationId, Location]): Iterable[(LocalDate, Location, Temperature)] = {
 
     val lines = Utils.getLinesIteratorFromResFile(temperaturesFile, getClass).toList
     val temperatureRecs = lines.par

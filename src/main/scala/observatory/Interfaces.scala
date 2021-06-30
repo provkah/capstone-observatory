@@ -71,14 +71,14 @@ trait VisualizationInterface {
 
 trait ExtractionInterface {
 
-  def locateStations(stationsFile: String): Iterable[((Option[StnId], Option[WbanId]), Location)]
+  def locateStations(stationsFile: String): Iterable[(StationId, Location)]
 
   def locateTemperatures(
     year: Year, stationsFile: String, temperaturesFile: String): Iterable[(LocalDate, Location, Temperature)]
 
   def locateTemperatures(
     year: Year, temperaturesFile: String,
-    stationLocations: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(LocalDate, Location, Temperature)]
+    stationLocations: Map[StationId, Location]): Iterable[(LocalDate, Location, Temperature)]
 
   def locationYearlyAverageRecords(
     records: Iterable[(LocalDate, Location, Temperature)]): Iterable[(Location, Temperature)]
@@ -97,9 +97,9 @@ trait ExtractionUtilsInterface {
 
   val NoTempStr = "9999.9"
 
-  def lineToTemperatureRec(line: String): ((Option[StnId], Option[WbanId]), (Month, Day), Temperature)
+  def lineToTemperatureRec(line: String): (StationId, (Month, Day), Temperature)
 
-  def lineToStationRec(line: String): ((Option[StnId], Option[WbanId]), Location)
+  def lineToStationRec(line: String): (StationId, Location)
 }
 
 trait OutputUtilsInterface {

@@ -24,23 +24,24 @@ object Main extends App {
 
   private def yearLocationAvgTemperatures(
     years: Iterable[Year],
-    stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location]): Iterable[(Year, Iterable[(Location, Temperature)])] =
+    stationLocationMap: Map[StationId, Location]): Iterable[(Year, Iterable[(Location, Temperature)])] = {
 
-    for {
-      year <- years
-      p1 = Console.println(s"Year: $year")
-
-      temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
-      p2 = Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
-
-      locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
-      p3 = Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
-    } yield (year, locAvgTemperatures)
+    val yearTemperatureRecs = years.map(year => {
+      val temperatureRecs = Extraction.locateTemperatures(year, s"/$year.csv", stationLocationMap)
+      Console.println(s"Year: $year, temperatureRecs size: ${temperatureRecs.size}")
+      (year, temperatureRecs)
+    })
+    yearTemperatureRecs.map({ case (year, temperatureRecs) =>
+      val locAvgTemperatures = Extraction.locationYearlyAverageRecords(temperatureRecs)
+      Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
+      (year, locAvgTemperatures)
+    })
+  }
 
   val stations = Extraction.locateStations(s"/$StationsFile")
   Console.println(s"stations size: ${stations.size}")
 
-  val stationLocationMap: Map[(Option[StnId], Option[WbanId]), Location] = stations.toMap
+  val stationLocationMap: Map[StationId, Location] = stations.toMap
 
   // 1975 to 1990
   val yearsForNormals = 1975 to 1975

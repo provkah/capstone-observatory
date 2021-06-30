@@ -51,8 +51,8 @@ object Main extends App {
   val allYearLocationAvgTemperatures = yearLocationAvgTemperatures(allYears, stationLocationMap)
   Console.println(s"allYearLocationAvgTemperatures: ${allYearLocationAvgTemperatures.size}")
 
-  for ((year, locAvgTemperatures) <- allYearLocationAvgTemperatures) {
-    Console.println(s"Deviations, year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
+  for ((year, locAvgTemperatures) <- allYearLocationAvgTemperatures.par) {
+    Console.println(s"Year: $year, locAvgTemps size: ${locAvgTemperatures.size}")
 
     // val image = Visualization.visualize(locAvgTemperatures, OutputUtils.temperatureColors)
     // Console.println(s"Created image: $image")

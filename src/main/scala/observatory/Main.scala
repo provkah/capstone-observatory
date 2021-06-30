@@ -11,11 +11,7 @@ object Main extends App {
   // Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
 
   /*val spark: SparkSession =
-    SparkSession
-      .builder()
-      .appName("Observatory")
-      .master("local")
-      .getOrCreate()
+    SparkSession.builder().appName("Observatory").master("local").getOrCreate()
 
   spark.close()*/
 

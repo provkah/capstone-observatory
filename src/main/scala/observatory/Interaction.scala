@@ -102,17 +102,15 @@ object Interaction extends InteractionInterface {
     */
   def generateTiles[Data](
     yearlyData: Iterable[(Year, Data)],
-    generateImage: (Year, Tile, Data) => Unit): Unit = {
+    generateImage: (Year, Tile, Data) => Unit): Unit =
 
     yearlyData.par.foreach({ case (year, yearData) => generateTiles(year, yearData, generateImage) })
-  }
 
   def generateTiles[Data](
     year: Int, data: Data,
-    generateImage: (Year, Tile, Data) => Unit): Unit = {
+    generateImage: (Year, Tile, Data) => Unit): Unit =
 
     ZoomLevels.par.foreach(generateTiles(year, data, _, generateImage))
-  }
 
   private def generateTiles[Data](
     year: Int, data: Data, zoom: Int,

@@ -102,19 +102,22 @@ object Interaction extends InteractionInterface {
     */
   def generateTiles[Data](
     yearlyData: Iterable[(Year, Data)],
-    generateImage: (Year, Tile, Data) => Unit): Unit =
+    generateImage: (Year, Tile, Data, Boolean) => Unit,
+    overwrite: Boolean): Unit =
 
-    yearlyData.par.foreach({ case (year, yearData) => generateTiles(year, yearData, generateImage) })
+    yearlyData.par.foreach({ case (year, yearData) => generateTiles(year, yearData, generateImage, overwrite) })
 
   def generateTiles[Data](
     year: Int, data: Data,
-    generateImage: (Year, Tile, Data) => Unit): Unit =
+    generateImage: (Year, Tile, Data, Boolean) => Unit,
+    overwrite: Boolean): Unit =
 
-    ZoomLevels.par.foreach(generateTiles(year, data, _, generateImage))
+    ZoomLevels.par.foreach(generateTiles(year, data, _, generateImage, overwrite))
 
   private def generateTiles[Data](
     year: Int, data: Data, zoom: Int,
-    generateImage: (Year, Tile, Data) => Unit): Unit = {
+    generateImage: (Year, Tile, Data, Boolean) => Unit,
+    overwrite: Boolean): Unit = {
 
     val numTiles = pow(2, zoom).toInt
     val tiles = for {
@@ -122,41 +125,46 @@ object Interaction extends InteractionInterface {
       yTile <- 0 until numTiles
     } yield Tile(xTile, yTile, zoom)
 
-    tiles.par.foreach(generateImage(year, _, data))
+    tiles.par.foreach(generateImage(year, _, data, overwrite))
   }
 
   private def generateImageFile(
     year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)],
     temperatureColors: Iterable[(Temperature, Color)],
-    outputFolder: String): Unit = {
-
-    Console.println(s"Generating image, year: $year, tile $tile")
-    val image = Interaction.tile(locTemperatures, temperatureColors, tile)
-    Console.println(s"Image, year: $year, tile $tile, image $image")
+    outputFolder: String, overwrite: Boolean): Unit = {
 
     val imageFolderName = s"$outputFolder/$year/${tile.zoom}"
-    val folderPath = Paths.get(imageFolderName)
-    Files.createDirectories(folderPath)
-    Console.println(s"created, if did not exist, folder: $folderPath")
-
     val imageFileName = s"$imageFolderName/${tile.x}-${tile.y}.png"
-    image.output(imageFileName)(ImageWriter.default)
-    Console.println(s"Created image file: $imageFileName")
+
+    if (overwrite || !Files.exists(Paths.get(imageFileName))) {
+      Console.println(s"Generating image, year: $year, tile $tile")
+      val image = Interaction.tile(locTemperatures, temperatureColors, tile)
+      Console.println(s"Image, year: $year, tile $tile, image $image")
+
+      val folderPath = Paths.get(imageFolderName)
+      Files.createDirectories(folderPath)
+      Console.println(s"created, if did not exist, folder: $folderPath")
+
+      image.output(imageFileName)(ImageWriter.default)
+      Console.println(s"Created image file: $imageFileName")
+    } else {
+      Console.println(s"Image file exists: $imageFileName")
+    }
   }
 
   def generateTemperatureImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit =
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)], overwrite: Boolean): Unit =
 
     generateImageFile(
       year, tile, locTemperatures,
       TemperatureColors,
-      TemperatureImageOutputFolder)
+      TemperatureImageOutputFolder, overwrite)
 
   def generateTemperatureDeviationImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit =
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)], overwrite: Boolean): Unit =
 
     generateImageFile(
       year, tile, locTemperatures,
       TemperatureDeviationColors,
-      TemperatureDeviationImageOutputFolder)
+      TemperatureDeviationImageOutputFolder, overwrite)
 }

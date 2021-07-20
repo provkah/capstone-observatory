@@ -26,6 +26,9 @@ object Main extends App {
   val YearsForTemperatureDeviations = 1991 to 2015
   Console.println(s"yearsForTemperatureDeviations: $YearsForTemperatureDeviations")
 
+  val overwriteFiles = false
+  Console.println(s"overwriteFiles: $overwriteFiles")
+
   private def yearLocationAvgTemperatures(
     years: Iterable[Year],
     stationLocationMap: Map[StationId, Location]): Iterable[(Year, Iterable[(Location, Temperature)])] = {
@@ -56,7 +59,7 @@ object Main extends App {
     // val image = Visualization.visualize(locAvgTemperatures, OutputUtils.temperatureColors)
     // Console.println(s"Created image: $image")
 
-    Interaction.generateTiles(year, locAvgTemperatures, Interaction.generateTemperatureImageFile)
+    Interaction.generateTiles(year, locAvgTemperatures, Interaction.generateTemperatureImageFile, overwriteFiles)
 
     val gridLocTemperatureGrid = Manipulation.makeGrid(locAvgTemperatures)
     Console.println(s"Year: $year, created gridLocTemperatureGrid")
@@ -91,6 +94,6 @@ object Main extends App {
       .toList
     Console.println(s"Deviations, year: $year, temperatureDeviations: ${temperatureDeviations.size}")
 
-    Interaction.generateTiles(year, temperatureDeviations, Interaction.generateTemperatureDeviationImageFile)
+    Interaction.generateTiles(year, temperatureDeviations, Interaction.generateTemperatureDeviationImageFile, overwriteFiles)
   }
 }

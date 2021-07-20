@@ -41,17 +41,19 @@ trait InteractionInterface {
 
   def generateTiles[Data](
     yearlyData: Iterable[(Year, Data)],
-    generateImage: (Year, Tile, Data) => Unit): Unit
+    generateImage: (Year, Tile, Data, Boolean) => Unit,
+    overwrite: Boolean): Unit
 
   def generateTiles[Data](
     year: Int, data: Data,
-    generateImage: (Year, Tile, Data) => Unit): Unit
+    generateImage: (Year, Tile, Data, Boolean) => Unit,
+    overwrite: Boolean): Unit
 
   def generateTemperatureImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)], overwrite: Boolean): Unit
 
   def generateTemperatureDeviationImageFile(
-    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)]): Unit
+    year: Int, tile: Tile, locTemperatures: Iterable[(Location, Temperature)], overwrite: Boolean): Unit
 }
 
 trait VisualizationInterface {

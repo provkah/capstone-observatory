@@ -12,11 +12,14 @@ import scala.math.{Pi, atan, pow, sinh}
 object Interaction extends InteractionInterface {
 
   val TileSize = 256
-  val GenTileSize = 256
 
-  // number of subtiles in both axis: 2 ** 8 == 256
-  val TileRelativeZoom = 8
-  val TileCoordFactor: Int = pow(2, TileRelativeZoom).toInt
+  val GenScaleZoom = 0 // 0 - no scaling, 1 - scaling factor 2
+  private val GenScaleFactor = pow(2, GenScaleZoom).toInt
+  private val GenTileSize = TileSize / GenScaleFactor
+
+  // in unscaled case - number of subtiles in both axis: 2 ** 8 == 256
+  private val TileRelativeZoom = 8 - GenScaleZoom
+  private val TileCoordFactor = pow(2, TileRelativeZoom).toInt
 
   val TileRgbaAlpha = 0.5
 
@@ -80,10 +83,11 @@ object Interaction extends InteractionInterface {
     val image = Image(GenTileSize, GenTileSize, pixels.toArray)
     Console.println(s"Done generating image, tile $tile, image $image")
 
-    if (GenTileSize == TileSize) image
+    Console.println(s"GenTileSize: $GenTileSize, GenScaleFactor: $GenScaleFactor")
+    if (GenScaleFactor == 1) image
     else {
-      val scaledImage = image.scale(TileSize / GenTileSize)
-      Console.println(s"Scaled image, tile $tile, scaledImage $scaledImage")
+      val scaledImage = image.scale(GenScaleFactor)
+      Console.println(s"Scaled image, tile $tile, GenScaleFactor: $GenScaleFactor, scaledImage $scaledImage")
 
       scaledImage
     }
